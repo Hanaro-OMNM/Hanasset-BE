@@ -17,10 +17,17 @@ spring:
         show_sql: true
         format_sql: true
 
+  # redis 관련 설정, 에러 나면 주석 처리
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 logging:
   level:
     org.springframework.security: DEBUG
 
+# swagger 관련 설정
 springdoc:
   # HTML 형식의 swagger 문서의 사용자 경로 지정
   swagger-ui:
