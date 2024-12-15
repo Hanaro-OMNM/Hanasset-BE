@@ -20,3 +20,13 @@ spring:
 logging:
   level:
     org.springframework.security: DEBUG
+
+springdoc:
+  # HTML 형식의 swagger 문서의 사용자 경로 지정
+  swagger-ui:
+    path: /swagger-ui.html
+    groups-order: DESC # path, query, body, response 순으로 출력
+
+  # JSON 형식의 OpenAPI 문서의 사용자 경로 지정
+  api-docs:
+    path: /api-docs
