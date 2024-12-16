@@ -6,9 +6,9 @@ spring:
     port: 8080
 
   datasource:
-    url: jdbc:mysql://127.0.0.1:3307/assignmentdb?useUniCode=yes&characterEncoding=UTF-8
-    username: scott
-    password: tiger
+    url: jdbc:mysql://127.0.0.1:3306/omnm?useUniCode=yes&characterEncoding=UTF-8
+    username: root
+    password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -16,6 +16,12 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+    hibernate:
+      ddl-auto: create
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database-platform: org.hibernate.spatial.dialect.mysql.MySQL56InnoDBSpatialDialect
 
   # redis 관련 설정, 에러 나면 주석 처리
   data:
