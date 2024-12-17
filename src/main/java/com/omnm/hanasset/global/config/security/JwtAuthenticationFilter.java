@@ -1,7 +1,6 @@
 package com.omnm.hanasset.global.config.security;
 
 import com.omnm.hanasset.global.config.RedisHandler;
-import com.omnm.hanasset.global.exception.CustomException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

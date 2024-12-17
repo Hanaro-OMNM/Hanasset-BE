@@ -43,7 +43,6 @@ public class SecurityConfig {
                                 .requestMatchers("/error/**", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg").permitAll() // 임시
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 );
-
         return http.build();
     }
 }
