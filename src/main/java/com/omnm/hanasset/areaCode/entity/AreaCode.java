@@ -25,20 +25,20 @@ public class AreaCode {
 
     @NotNull
     @Column(name = "code")
-    private Integer code;
+    private Long code;
 
     @NotNull
     @Column(name = "address")
     private String address;
 
     @Column(name = "city_code")
-    private Integer cityCode;
+    private Long cityCode;
 
     @Column(name = "sigungu_code")
-    private Integer sigunguCode;
+    private Long sigunguCode;
 
     @Column(name = "emd_code")
-    private Integer emdCode;
+    private Long emdCode;
 
     @Column(name = "city_name")
     private String cityName;
