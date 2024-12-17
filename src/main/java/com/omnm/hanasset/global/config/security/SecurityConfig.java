@@ -1,4 +1,4 @@
-package com.omnm.hanasset.global.config;
+package com.omnm.hanasset.global.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package com.omnm.hanasset.global.config;
+package com.omnm.hanasset.global.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
