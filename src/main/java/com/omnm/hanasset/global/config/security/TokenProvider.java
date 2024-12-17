@@ -7,7 +7,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,8 +26,7 @@ public class TokenProvider {
     @Value("${spring.jwt.expiration_time}")
     private Long TOKEN_EXPIRE_TIME;
 
-    @Autowired
-    UserAuthenticationService userAuthenticationService;
+    private final UserAuthenticationService userAuthenticationService;
 
     public String generateToken(String username) {
         Claims claims = Jwts.claims().setSubject(username);

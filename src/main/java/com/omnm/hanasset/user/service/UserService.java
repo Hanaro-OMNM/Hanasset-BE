@@ -5,19 +5,19 @@ import com.omnm.hanasset.user.dto.EmailSignInRequest;
 import com.omnm.hanasset.user.dto.EmailSignUpRequest;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
-    final PasswordEncoder passwordEncoder; // 반드시 final로 선언; 인증과 인가에서 사용될 패스워드의 인코딩 방식을 지정; PasswordConfig 파일 확인
-    final TokenProvider tokenProvider;
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder; // 반드시 final로 선언; 인증과 인가에서 사용될 패스워드의 인코딩 방식을 지정; PasswordConfig 파일 확인
+    private final TokenProvider tokenProvider; // 반드시 final로 선언; JWT 발급
 
     @Transactional
     public void signUp(EmailSignUpRequest emailSignUpRequest) {
