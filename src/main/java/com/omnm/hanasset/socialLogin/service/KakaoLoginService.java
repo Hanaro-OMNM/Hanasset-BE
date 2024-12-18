@@ -1,5 +1,6 @@
 package com.omnm.hanasset.socialLogin.service;
 
+import com.omnm.hanasset.socialLogin.dto.KakaoLogoutResponse;
 import com.omnm.hanasset.socialLogin.dto.KakaoTokenResponse;
 import com.omnm.hanasset.socialLogin.dto.KakaoUserInfoResponse;
 import io.netty.handler.codec.http.HttpHeaderValues;
@@ -11,28 +12,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 @Service
 @Log4j2
 public class KakaoLoginService {
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
-    private String redirectUri;
-
     @Value("${spring.security.oauth2.client.provider.kakao.token-uri}")
-    private String KAUTH_TOKEN_URL_HOST;
+    private String TOKEN_URL;
 
     @Value("${spring.security.oauth2.client.provider.kakao.user-info-uri}")
-    private String KAUTH_USER_URL_HOST = "https://kapi.kakao.com";
+    private String USER_URL;
+
+    private String LOGOUT_URL = "https://kapi.kakao.com/v1/user/logout";
 
     public String getAccessToken(String code) {
-        KakaoTokenResponse kakaoTokenResponse = WebClient.create(KAUTH_TOKEN_URL_HOST).post()
+        KakaoTokenResponse kakaoTokenResponse = WebClient.create(TOKEN_URL)
+                .post()
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
                         .queryParam("grant_type", "authorization_code")
@@ -49,8 +45,8 @@ public class KakaoLoginService {
         return kakaoTokenResponse.getAccessToken();
     }
 
-    public KakaoUserInfoResponse getUserInfo(String accessToken) {
-        KakaoUserInfoResponse userInfo = WebClient.create(KAUTH_USER_URL_HOST)
+    public String getUserId(String accessToken) {
+        KakaoUserInfoResponse userInfoResponse = WebClient.create(USER_URL)
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
@@ -64,41 +60,26 @@ public class KakaoLoginService {
                 .bodyToMono(KakaoUserInfoResponse.class)
                 .block();
 
-        log.info("[ Kakao Service ] Auth ID ---> {} ", userInfo.getId());
+        log.info("[ Kakao Service ] Auth ID ---> {} ", userInfoResponse.getId());
 
-        return userInfo;
+        return userInfoResponse.getId();
     }
 
-    public void kakaoLogout(String accessToken){
-        String reqUrl = "https://kapi.kakao.com/v1/user/logout";
+    public void logout(String accessToken){
+        KakaoLogoutResponse kakaoLogoutResponse = WebClient.create(LOGOUT_URL)
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .build(true))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken) // access token 인가
+                .header(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString())
+                .retrieve()
+                //TODO : Custom Exception
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new RuntimeException("Invalid Parameter")))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new RuntimeException("Internal Server Error")))
+                .bodyToMono(KakaoLogoutResponse.class)
+                .block();
 
-        try{
-            URL url = new URL(reqUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-
-            int responseCode = conn.getResponseCode();
-            log.info("[KakaoApi.kakaoLogout] responseCode : {}",  responseCode);
-
-            BufferedReader br;
-            if (responseCode >= 200 && responseCode <= 300) {
-                br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            } else {
-                br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-            }
-
-            String line = "";
-            StringBuilder responseSb = new StringBuilder();
-            while((line = br.readLine()) != null){
-                responseSb.append(line);
-            }
-            String result = responseSb.toString();
-            log.info("kakao logout - responseBody = {}", result);
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        log.info("[ Kakao Service ] Auth ID ---> {} ", kakaoLogoutResponse.getId());
     }
-
 }

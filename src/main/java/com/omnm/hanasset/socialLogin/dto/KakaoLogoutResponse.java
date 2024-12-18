@@ -5,16 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Getter
-@NoArgsConstructor //역직렬화를 위한 기본 생성자
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KakaoUserInfoResponse {
-    //회원 번호
+public class KakaoLogoutResponse {
     @JsonProperty("id")
-    public String id;
-    //서비스에 연결 완료된 시각. UTC
-    @JsonProperty("connected_at")
-    public Date connectedAt;
+    public Long id;
 }
