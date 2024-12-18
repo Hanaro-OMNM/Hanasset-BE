@@ -2,12 +2,10 @@ package com.omnm.hanasset.realEstate.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 
+@ToString
 @Getter
 @Builder
 @NoArgsConstructor
@@ -60,8 +58,8 @@ public class RealEstate {
     @Column(name = "target_floor")
     private Integer targetFloor;
 
-    @Column(name = "img_urls", columnDefinition = "TEXT")
-    private String imgUrls;
+    @Column(name = "img_url", columnDefinition = "TEXT")
+    private String imgUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "housing_type_id", nullable = false)
