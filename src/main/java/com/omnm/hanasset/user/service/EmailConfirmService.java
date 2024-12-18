@@ -46,20 +46,21 @@ public class EmailConfirmService {
             throw new EmailException("이메일 인증 코드가 일치하지 않습니다.");
         }
 
-        mailConfirm(email); // redis에 저장
+        mailConfirm(email); // redis에 저장: <String, String> key는 이메일, value는 "confirmed"
     }
 
-    private MimeMessage createEmail(String mail){
+    private MimeMessage createEmail(String email){
+
         String authCode = createCode();
 
-        redisHandler.setValueOperations(mail,
+        redisHandler.setValueOperations(email,
                 authCode, Duration.ofMillis(this.authCodeExpirationMillis));
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
             message.setFrom(senderEmail);
-            message.setRecipients(MimeMessage.RecipientType.TO, mail);
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
             message.setSubject("하나셋 회원가입을 위해 이메일 인증을 진행해주세요.");
 
             StringBuilder msgContent = new StringBuilder();
