@@ -1,6 +1,6 @@
 package com.omnm.hanasset.loan.service;
 
-import com.omnm.hanasset.loan.LoanMapper;
+import com.omnm.hanasset.loan.utils.LoanMapper;
 import com.omnm.hanasset.loan.dto.LoanInfoDTO;
 import com.omnm.hanasset.loan.dto.LoanRequest;
 import com.omnm.hanasset.loan.entity.Loan;
