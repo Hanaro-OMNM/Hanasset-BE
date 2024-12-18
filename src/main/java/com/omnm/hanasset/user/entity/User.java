@@ -30,6 +30,7 @@ public class User {
     private LocalDateTime birthDate;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp

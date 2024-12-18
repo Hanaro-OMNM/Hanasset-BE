@@ -44,4 +44,6 @@ public class UserController {
         log.info("token : {}", token);
         return ResponseEntity.ok().headers(headers).body("로그인 성공\n이메일 : " + emailSignInRequest.getEmail());
     }
+
+    
 }
