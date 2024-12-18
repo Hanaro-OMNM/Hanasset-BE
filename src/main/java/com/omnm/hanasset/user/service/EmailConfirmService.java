@@ -67,7 +67,7 @@ public class EmailConfirmService {
             msgContent.append("<div>");
             msgContent.append("인증코드를 확인해주세요.<br><strong style=\"font-size: 30px;\">");
             msgContent.append(authCode);
-            msgContent.append("</strong><br>이메일 인증 절차에 따라 이메일 인증코드를 발급해드립니다.<br>인증코드는 이메일 발송 시점으로부터 3분동안 유효합니다.</div>");
+            msgContent.append("</strong><br>이메일 인증 절차에 따라 이메일 인증코드를 발급해드립니다.<br>인증코드는 이메일 발송 시점으로부터 5분동안 유효합니다.</div>");
 
             message.setText(msgContent.toString(),"UTF-8", "html");
 
