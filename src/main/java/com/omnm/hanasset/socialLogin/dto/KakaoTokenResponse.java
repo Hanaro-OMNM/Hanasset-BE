@@ -1,4 +1,4 @@
-package com.omnm.hanasset.login.dto;
+package com.omnm.hanasset.socialLogin.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
