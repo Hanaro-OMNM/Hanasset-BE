@@ -1,4 +1,4 @@
-package com.omnm.hanasset.markers.dto;
+package com.omnm.hanasset.marker.dto;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MarkersAreaResponse {
+public class AreaMarkersResponse {
     private CurrentMarkersDTO currentMarkers;
     private List<ShowMarkersDTO> markerInfos;
 }

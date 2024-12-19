@@ -1,4 +1,4 @@
-package com.omnm.hanasset.markers.dto;
+package com.omnm.hanasset.marker.dto;
 
 import lombok.*;
 import org.locationtech.jts.geom.Point;

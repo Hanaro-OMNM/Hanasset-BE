@@ -1,4 +1,4 @@
-package com.omnm.hanasset.markers.utils;
+package com.omnm.hanasset.marker.utils;
 
 public class NaverMapUtil {
 

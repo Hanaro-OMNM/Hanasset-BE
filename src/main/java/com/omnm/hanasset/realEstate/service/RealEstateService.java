@@ -6,12 +6,14 @@ import com.omnm.hanasset.realEstate.repository.RealEstateRepository;
 import com.omnm.hanasset.realEstate.utils.RealEstateMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RealEstateService {
     private final RealEstateRepository realEstateRepository;
     private final RealEstateMapper realEstateMapper;
