@@ -10,8 +10,8 @@ public record ApiResponse<T>(
         @Nullable String message,
         @Nullable T result
         ) {
-    public static <T> ApiResponse<T> ok(@Nullable final T data) {
-        return new ApiResponse<>(HttpStatus.OK, null, data);
+    public static <T> ApiResponse<T> ok(final String msg, @Nullable final T result) {
+        return new ApiResponse<>(HttpStatus.OK, msg, result);
     }
 
     public static <T> ApiResponse<T> fail(final ErrorCode errorCode) {

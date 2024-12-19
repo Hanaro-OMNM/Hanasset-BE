@@ -1,5 +1,6 @@
-package com.omnm.hanasset.global.common;
+package com.omnm.hanasset.global.common.handler;
 
+import com.omnm.hanasset.global.common.ApiResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
