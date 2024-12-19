@@ -27,10 +27,10 @@ public class RealEstateService {
                 .build();
     }
 
-    public RealEstateDetailResponse getRealEstateDetail(Long realEstateId) {
+    public RealEstateBasicResponse getRealEstateBasic(Long realEstateId) {
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 부동산이 존재하지 않습니다."));
-        return realEstateMapper.toRealEstateDetailResponse(realEstate);
+        return realEstateMapper.toRealEstateBasicResponse(realEstate.getHousingType().getHousingComplex());
     }
 
     public RealEstateTypeResponse getRealEstateType(Long realEstateId) {
@@ -39,9 +39,9 @@ public class RealEstateService {
         return realEstateMapper.toRealEstateTypeResponse(realEstate.getHousingType());
     }
 
-    public RealEstateBasicResponse getRealEstateBasic(Long realEstateId) {
+    public RealEstateDetailResponse getRealEstateDetail(Long realEstateId) {
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 부동산이 존재하지 않습니다."));
-        return realEstateMapper.toRealEstateBasicResponse(realEstate.getHousingType().getHousingComplex());
+        return realEstateMapper.toRealEstateDetailResponse(realEstate);
     }
 }
