@@ -18,7 +18,7 @@ public class RealEstate {
     private Long realEstateId;
 
     @NotNull
-    @Column(name = "code")
+    @Column(name = "code", unique = true)
     private Long code;
 
     @NotNull
