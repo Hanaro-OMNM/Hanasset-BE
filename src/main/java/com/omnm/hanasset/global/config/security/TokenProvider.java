@@ -95,6 +95,7 @@ public class TokenProvider {
             return Jwts.parserBuilder().
                     setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
+            // 만료된 토큰에서도 유저 정보는 반환 가능
             return e.getClaims();
         }
     }
