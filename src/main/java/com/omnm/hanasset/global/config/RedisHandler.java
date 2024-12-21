@@ -44,7 +44,6 @@ public class RedisHandler {
         redisConfig.redisTemplate().opsForValue().set(key, value, duration);
     }
 
-
     /**
      * Redis 작업중 등록, 수정, 삭제에 대해서 처리 및 예외처리를 수행
      *
@@ -70,5 +69,9 @@ public class RedisHandler {
 
     public boolean keyExists(String token) {
         return Boolean.TRUE.equals(redisConfig.redisTemplate().hasKey(token));
+    }
+
+    public void deleteByKey(String key) {
+        redisConfig.redisTemplate().delete(key);
     }
 }
