@@ -1,5 +1,6 @@
 package com.omnm.hanasset.global.config.security;
 
+import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.user.service.UserAuthenticationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.util.Date;
 
 @Component
@@ -23,22 +25,49 @@ public class TokenProvider {
     @Value("${spring.jwt.secret}")
     private String secretKey;
 
-    @Value("${spring.jwt.expiration_time}")
+    @Value("${spring.jwt.token.expiration_time}")
     private Long TOKEN_EXPIRE_TIME;
+
+    @Value("${spring.jwt.token.refresh_expiration_time}")
+    private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     private final UserAuthenticationService userAuthenticationService;
 
-    public String generateToken(String username) {
+    private final RedisHandler redisHandler;
+
+    // 액세스 토큰 생성
+    public String generateAccessToken(String username) {
         Claims claims = Jwts.claims().setSubject(username);
 
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + TOKEN_EXPIRE_TIME);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS512, this.secretKey)
                 .compact();
+    }
+
+    // Refresh Token 생성
+    public String generateRefreshToken(String username) {
+        Claims claims = Jwts.claims().setSubject(username);
+
+        Date now = new Date(); // 현재 시간
+        Date expiredDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_TIME);
+        Duration expiredDuration = Duration.ofMillis(REFRESH_TOKEN_EXPIRE_TIME); // Duration으로 생성
+
+        String refreshToken = Jwts.builder()
+//                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(expiredDate)
+                .signWith(SignatureAlgorithm.HS512, this.secretKey)
+                .compact();
+
+        redisHandler.setValueOperations(username, refreshToken, expiredDuration); // Redis 저장
+
+        return refreshToken;
     }
 
     public Authentication getAuthentication(String jwt) {
@@ -78,7 +107,7 @@ public class TokenProvider {
         }
     }
 
-    // 토큰의 남은 시간 가져오기 (토큰 blacklist Redis 저장 때 duration 지정 위해 쓰임)
+    // 토큰의 남은 시간 가져오기 (토큰 blacklist Redis 저장 때 duration 지정 위해 쓰일 예정)
     public long calculateRemainingTime(Date expiration) {
         Date now = new Date();
         return expiration.getTime() - now.getTime();

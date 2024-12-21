@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -35,12 +38,20 @@ public class UserService {
     }
 
     @Transactional
-    public String signIn(EmailSignInRequest emailSignInRequest) {
+    public List<String> signIn(EmailSignInRequest emailSignInRequest) {
         User user = userRepository.findByEmail(emailSignInRequest.getEmail()).orElseThrow(IllegalArgumentException::new);
 
         isPasswordMatches(emailSignInRequest.getPassword(), user.getPassword()); // 비밀번호 일치하는지 체크
 
-        return tokenProvider.generateToken(emailSignInRequest.getEmail());
+        List<String> tokensList = new ArrayList<>();
+
+        String accessToken = tokenProvider.generateAccessToken(emailSignInRequest.getEmail());
+        String refreshToken = tokenProvider.generateRefreshToken(emailSignInRequest.getEmail());
+
+        tokensList.add(accessToken);
+        tokensList.add(refreshToken);
+
+        return tokensList;
     }
 
     private void isEmailExists (String email) {

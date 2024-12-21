@@ -3,6 +3,8 @@ package com.omnm.hanasset.user.controller;
 import com.omnm.hanasset.user.dto.EmailSignInRequest;
 import com.omnm.hanasset.user.dto.EmailSignUpRequest;
 import com.omnm.hanasset.user.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -20,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+
+    private final HttpServletResponse response;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(
@@ -34,16 +40,25 @@ public class UserController {
     public ResponseEntity<String> signin(
         @RequestBody @Valid EmailSignInRequest emailSignInRequest
     ) {
-        String token = userService.signIn(emailSignInRequest);
-        log.info("token : {}", token);
+        List<String> tokensList = userService.signIn(emailSignInRequest);
+        log.info("access token : {}", tokensList.get(0));
 
+        // Access Token은 헤더에 저장
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + token);
+        headers.add("Authorization", "Bearer " + tokensList.get(0));
+
+        // Refresh Token은 쿠키에 저장
+        Cookie refreshCookie = new Cookie("refreshToken", tokensList.get(1));
+        refreshCookie.setHttpOnly(true); // JavaScript를 통한 접근 방지
+        refreshCookie.setSecure(true); // HTTPS를 통해서만 쿠키 전송
+        refreshCookie.setPath("/"); // 사이트 전체에서 쿠키 사용
+        refreshCookie.setMaxAge(14 * 24 * 60 * 60); // 2주
+        response.addCookie(refreshCookie);
 
         log.info("로그인 성공, email : {}", emailSignInRequest.getEmail());
-        log.info("token : {}", token);
+
         return ResponseEntity.ok().headers(headers).body("로그인 성공\n이메일 : " + emailSignInRequest.getEmail());
     }
 
-    
+
 }

@@ -35,6 +35,7 @@ public class SecurityConfig {
                         authorize
                                 .requestMatchers("/users/signin/**").permitAll()
                                 .requestMatchers("/users/signup/**").permitAll()
+                                .requestMatchers("/users/birth/**").authenticated()
                                 .requestMatchers("/swagger-resources/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 .requestMatchers("/error/**").permitAll() // 임시
