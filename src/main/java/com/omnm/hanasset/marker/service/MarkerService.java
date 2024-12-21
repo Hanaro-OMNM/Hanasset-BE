@@ -37,7 +37,7 @@ public class MarkerService {
         Point center = geometryFactory.createPoint(new Coordinate(lng, lat));
         center.setSRID(SRID);
         CurrentMarkersDTO result;
-        if (zoom <= 9) {
+        if (zoom <= 10) {
             result = areaCodeRepository.findNearSiDo(center);
         } else if (zoom <= 13) {
             result = areaCodeRepository.findNearSiGunGu(center);
@@ -64,8 +64,6 @@ public class MarkerService {
             result = areaCodeRepository.findAllWithinCircleDong(center, radius);
         }
 
-        System.out.println(zoom + ' ' + radius);
-
         return result.stream()
                 .map(this::convertToMarkersAreaDTO)
                 .collect(Collectors.toList());
@@ -82,7 +80,6 @@ public class MarkerService {
                 longitude
         );
     }
-
 
     public AptMarkersResponse getAptMarkers(int zoom, double lat, double lng) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
