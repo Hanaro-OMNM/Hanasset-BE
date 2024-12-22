@@ -28,24 +28,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String accessToken = tokenProvider.resolveTokenFromRequest(request); // request 헤더에서 토큰 가져오기
+            String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request); // request 쿠키에서 토큰 가져오기
 
-        String accessToken = tokenProvider.resolveTokenFromRequest(request); // request 헤더에서 토큰 가져오기
-        String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request); // request 쿠키에서 토큰 가져오기
-
-        String username = tokenProvider.getUsername(accessToken);
-
-        if (StringUtils.hasText(accessToken)) {
-            if (tokenProvider.validateToken(accessToken) && ! redisHandler.keyExists(accessToken)) {  // 유효성 검사 + 블랙리스트 확인
-                setAuthentication(accessToken); // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
+            if (StringUtils.hasText(accessToken)) {
+                handleAccessToken(accessToken, refreshToken, request, response);
             } else if (StringUtils.hasText(refreshToken)) {
-                validateAndRefreshToken(refreshToken, username, response);
+                String username = tokenProvider.getUsername(accessToken);
+                handleRefreshToken(refreshToken, username, response);
             }
-        }
 
-        filterChain.doFilter(request, response); // 다음 필터로 넘어가기
+            filterChain.doFilter(request, response); // 다음 필터로 넘어가기
+        } catch (Exception e) {
+            log.error("Unexpected error during authentication", e);
+            handleInvalidToken(response, "인증 처리 중 오류가 발생했습니다.");
+        }
     }
 
-    private void validateAndRefreshToken(String refreshToken, String username, HttpServletResponse response) throws IOException {
+    private void handleAccessToken(String accessToken, String refreshToken, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String username = tokenProvider.getUsername(accessToken);
+
+        try {
+            if (tokenProvider.validateToken(accessToken) && !redisHandler.keyExists(accessToken)) {
+                setAuthentication(accessToken); // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
+            } else if (StringUtils.hasText(refreshToken)) {
+                // access token이 유효하지 않을 경우, refresh token 체크
+                handleRefreshToken(refreshToken, username, response);
+            }
+        } catch (ExpiredJwtException e) {
+            log.warn("Access token has expired", e);
+
+            if (StringUtils.hasText(refreshToken)) {
+                handleRefreshToken(refreshToken, username, response);
+            } else {
+                handleInvalidToken(response, "만료된 액세스 토큰입니다.");
+            }
+        } catch (Exception e) {
+            log.error("Error validating access token", e);
+            handleInvalidToken(response, "잘못된 액세스 토큰입니다.");
+        }
+    }
+
+    private void handleRefreshToken(String refreshToken, String username, HttpServletResponse response) throws IOException {
         try {
             String storedToken = redisHandler.getValue(username);
 
@@ -89,7 +114,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-        response.setContentType("application/json");
+        response.setContentType("application/json; charset=UTF-8");
         response.getWriter().write("{\"message\": \"" + errorMessage + "\", \"result\": null}");
     }
 }
