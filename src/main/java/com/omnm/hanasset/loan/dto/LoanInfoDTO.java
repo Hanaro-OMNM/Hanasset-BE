@@ -10,5 +10,5 @@ public class LoanInfoDTO {
     private String nameText;
     private String rateText;
     private String limitText;
-    private Double dsr;
+    private String dsr;
 }

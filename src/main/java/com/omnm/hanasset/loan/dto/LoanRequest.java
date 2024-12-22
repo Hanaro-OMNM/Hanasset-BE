@@ -9,6 +9,5 @@ import java.util.List;
 @Data
 @Builder
 public class LoanRequest {
-    private Long userId;
     private List<Long> realEstateIds = new ArrayList<>();
 }
