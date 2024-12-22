@@ -4,6 +4,7 @@ import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,6 +26,7 @@ public class UserAuthenticationService implements UserDetailsService {
                 .id(user.getUserId())
                 .email(user.getEmail())
                 .password(user.getPassword())
+                .authority(new SimpleGrantedAuthority("ROLE_USER")) // 기본 권한 설정
                 .build();
     }
 }

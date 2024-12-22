@@ -21,7 +21,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // http 요청에대한 권한 제한 설정
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -33,9 +32,11 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize ->
                         authorize
+                                .requestMatchers("/").permitAll()
                                 .requestMatchers("/users/signin/**").permitAll()
                                 .requestMatchers("/users/signup/**").permitAll()
                                 .requestMatchers("/users/birth/**").permitAll()
+                                .requestMatchers("/users/logout/**").permitAll()
                                 .requestMatchers("/swagger-resources/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 .requestMatchers("/error/**").permitAll() // 임시

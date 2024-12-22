@@ -122,8 +122,17 @@ public class TokenProvider {
         return null;
     }
 
-    // 토큰의 남은 시간 가져오기 (토큰 blacklist Redis 저장 때 duration 지정 위해 쓰일 예정)
-    public long calculateRemainingTime(Date expiration) {
+    public void destoryToken(String accessToken, String refreshToken) {
+        Claims claims = parseClaims(accessToken);
+        Long expiration = calculateRemainingTime(claims.getExpiration());
+
+        redisHandler.deleteByKey(refreshToken);
+
+        redisHandler.setValueOperations(accessToken, "logout", Duration.ofMillis(expiration));
+    }
+
+    // 토큰의 남은 시간 가져오기
+    public Long calculateRemainingTime(Date expiration) {
         Date now = new Date();
         return expiration.getTime() - now.getTime();
     }

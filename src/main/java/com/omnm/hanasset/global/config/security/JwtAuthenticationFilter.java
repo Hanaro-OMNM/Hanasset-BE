@@ -50,8 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = tokenProvider.getUsername(accessToken);
 
         try {
-            if (tokenProvider.validateToken(accessToken) && !redisHandler.keyExists(accessToken)) {
-                setAuthentication(accessToken); // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
+            if (tokenProvider.validateToken(accessToken)) {
+                if (!redisHandler.keyExists(accessToken)) {
+                    setAuthentication(accessToken); // 토큰이 유효하고 로그아웃 블랙리스트에도 없을 경우, 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
+                } else {
+                    handleInvalidToken(response, "로그아웃된 토큰입니다.");
+                }
             } else if (StringUtils.hasText(refreshToken)) {
                 // access token이 유효하지 않을 경우, refresh token 체크
                 handleRefreshToken(refreshToken, username, response);

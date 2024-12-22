@@ -5,13 +5,16 @@ import com.omnm.hanasset.global.config.security.TokenProvider;
 import com.omnm.hanasset.user.dto.BirthRequest;
 import com.omnm.hanasset.user.dto.EmailSignInRequest;
 import com.omnm.hanasset.user.dto.EmailSignUpRequest;
+import com.omnm.hanasset.user.dto.UserResponse;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.exception.EmailException;
 import com.omnm.hanasset.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,10 +59,22 @@ public class UserService {
     }
 
     @Transactional
-    public void setBirthDate (BirthRequest birth) {
+    public void setBirthDate(BirthRequest birth) {
         User user = userRepository.findByEmail(birth.getEmail()).orElseThrow(IllegalArgumentException::new);
 
         user.updateBirthDate(birth.getBirthDate());
+    }
+
+    public UserResponse logout(HttpServletRequest request) {
+        String accessToken = tokenProvider.resolveTokenFromRequest(request);
+        String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request);
+
+        if (StringUtils.hasText(accessToken) && StringUtils.hasText(refreshToken)) {
+            tokenProvider.destoryToken(accessToken, refreshToken);
+            return UserResponse.builder().message("로그아웃 성공").build();
+        }
+
+        return UserResponse.builder().message("ERROR").build();
     }
 
     private void isEmailExists (String email) {

@@ -3,13 +3,16 @@ package com.omnm.hanasset.user.controller;
 import com.omnm.hanasset.user.dto.BirthRequest;
 import com.omnm.hanasset.user.dto.EmailSignInRequest;
 import com.omnm.hanasset.user.dto.EmailSignUpRequest;
+import com.omnm.hanasset.user.dto.UserResponse;
 import com.omnm.hanasset.user.service.UserService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,27 +30,22 @@ public class UserController {
 
     private final UserService userService;
 
-    private final HttpServletResponse response;
-
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(
+    public ResponseEntity<UserResponse> signup(
             @RequestBody @Valid EmailSignUpRequest emailSignUpRequest, HttpServletResponse response) throws IOException {
 
         userService.signUp(emailSignUpRequest);
 
-        final String redirect_uri="http://localhost:8080/users/birth";
-        response.sendRedirect(redirect_uri);
+        String redirect_uri = "http://localhost:8080/users/birth";
 
-        log.info("이메일 회원가입 성공, 이메일 : {}", emailSignUpRequest.getEmail());
-        return ResponseEntity.ok("이메일 회원가입 성공\n이메일 : " + emailSignUpRequest.getEmail());
+        return ResponseEntity.ok().header(HttpHeaders.LOCATION, redirect_uri).body(UserResponse.builder().message("이메일 회원가입 성공").build());
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<String> signin(
-        @RequestBody @Valid EmailSignInRequest emailSignInRequest
+    public ResponseEntity<UserResponse> signin(
+        @RequestBody @Valid EmailSignInRequest emailSignInRequest, HttpServletResponse response
     ) {
         List<String> tokensList = userService.signIn(emailSignInRequest);
-        log.info("access token : {}", tokensList.get(0));
 
         // Access Token은 헤더에 저장
         HttpHeaders headers = new HttpHeaders();
@@ -61,15 +59,25 @@ public class UserController {
         refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 1주
         response.addCookie(refreshCookie);
 
-        log.info("로그인 성공, email : {}", emailSignInRequest.getEmail());
-
-        return ResponseEntity.ok().headers(headers).body("로그인 성공\n이메일 : " + emailSignInRequest.getEmail());
+        return ResponseEntity.ok().headers(headers).body(UserResponse.builder().message("일반 로그인 성공").build());
     }
 
     @PostMapping("/birth")
-    public ResponseEntity<String> birth(@RequestBody @Valid BirthRequest birthRequest) {
+    public ResponseEntity<UserResponse> birth(@RequestBody @Valid BirthRequest birthRequest) {
         userService.setBirthDate(birthRequest);
 
-        return ResponseEntity.ok().body("생년월일 입력 성공");
+        return ResponseEntity.ok().body(UserResponse.builder().message("생년월일 입력 성공").build());
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<UserResponse> logout(HttpServletRequest request) {
+        UserResponse userResponse = userService.logout(request);
+
+        if (userResponse.getMessage().equals("ERROR")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(UserResponse.builder().message("유효하지 않은 요청입니다.").build());
+        }
+
+        return ResponseEntity.ok().body(userResponse);
     }
 }
