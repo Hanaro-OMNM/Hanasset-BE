@@ -2,6 +2,7 @@ package com.omnm.hanasset.user.service;
 
 import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.global.config.security.TokenProvider;
+import com.omnm.hanasset.user.dto.BirthRequest;
 import com.omnm.hanasset.user.dto.EmailSignInRequest;
 import com.omnm.hanasset.user.dto.EmailSignUpRequest;
 import com.omnm.hanasset.user.entity.User;
@@ -52,6 +53,13 @@ public class UserService {
         tokensList.add(refreshToken);
 
         return tokensList;
+    }
+
+    @Transactional
+    public void setBirthDate (BirthRequest birth) {
+        User user = userRepository.findByEmail(birth.getEmail()).orElseThrow(IllegalArgumentException::new);
+
+        user.updateBirthDate(birth.getBirthDate());
     }
 
     private void isEmailExists (String email) {

@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Builder
@@ -27,7 +28,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private LocalDateTime birthDate;
+    private LocalDate birthDate;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -36,4 +37,7 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public void updateBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 }

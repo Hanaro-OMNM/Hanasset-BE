@@ -1,5 +1,6 @@
 package com.omnm.hanasset.user.controller;
 
+import com.omnm.hanasset.user.dto.BirthRequest;
 import com.omnm.hanasset.user.dto.EmailSignInRequest;
 import com.omnm.hanasset.user.dto.EmailSignUpRequest;
 import com.omnm.hanasset.user.service.UserService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -29,8 +31,12 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(
-            @RequestBody @Valid EmailSignUpRequest emailSignUpRequest) {
+            @RequestBody @Valid EmailSignUpRequest emailSignUpRequest, HttpServletResponse response) throws IOException {
+
         userService.signUp(emailSignUpRequest);
+
+        final String redirect_uri="http://localhost:8080/users/birth";
+        response.sendRedirect(redirect_uri);
 
         log.info("이메일 회원가입 성공, 이메일 : {}", emailSignUpRequest.getEmail());
         return ResponseEntity.ok("이메일 회원가입 성공\n이메일 : " + emailSignUpRequest.getEmail());
@@ -60,5 +66,10 @@ public class UserController {
         return ResponseEntity.ok().headers(headers).body("로그인 성공\n이메일 : " + emailSignInRequest.getEmail());
     }
 
+    @PostMapping("/birth")
+    public ResponseEntity<String> birth(@RequestBody @Valid BirthRequest birthRequest) {
+        userService.setBirthDate(birthRequest);
 
+        return ResponseEntity.ok().body("생년월일 입력 성공");
+    }
 }
