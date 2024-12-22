@@ -71,6 +71,7 @@ public class RedisHandler {
         return Boolean.TRUE.equals(redisConfig.redisTemplate().hasKey(token));
     }
 
+    @Transactional
     public void deleteByKey(String key) {
         redisConfig.redisTemplate().delete(key);
     }

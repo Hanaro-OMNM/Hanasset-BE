@@ -1,5 +1,6 @@
 package com.omnm.hanasset.user.controller;
 
+import com.omnm.hanasset.user.dto.UserResponse;
 import com.omnm.hanasset.user.service.EmailConfirmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,21 +20,19 @@ public class EmailConfirmController {
     private final EmailConfirmService emailConfirmService;
 
     @PostMapping("/sendemail")
-    public ResponseEntity<String> sendEmail(@RequestParam String email) {
+    public ResponseEntity<UserResponse> sendEmail(@RequestParam String email) {
         emailConfirmService.sendEmail(email);
 
-        log.info("메일 발송 성공, 이메일 : {}", email);
-        return ResponseEntity.ok().body("메일을 확인해 주세요.");
+        return ResponseEntity.ok().body(UserResponse.builder().message("이메일 인증 보내기 성공").build());
     }
 
     @GetMapping("/receive_code")
-    public ResponseEntity<String> receiveCode(
+    public ResponseEntity<UserResponse> receiveCode(
             @RequestParam("email") String email,
             @RequestParam("code") String code) {
 
         emailConfirmService.codeConfirm(email, code);
 
-        log.info("인증 완료, 이메일 : {}", email);
-        return ResponseEntity.ok().body("이메일 인증 완료 성공");
+        return ResponseEntity.ok().body(UserResponse.builder().message("이메일 인증 완료 성공").build());
     }
 }
