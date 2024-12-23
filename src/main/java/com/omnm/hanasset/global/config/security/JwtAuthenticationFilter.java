@@ -1,7 +1,7 @@
 package com.omnm.hanasset.global.config.security;
 
 import com.omnm.hanasset.global.config.RedisHandler;
-import com.omnm.hanasset.global.exception.CustomException;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request); // request 쿠키에서 토큰 가져오기
 
             if (StringUtils.hasText(accessToken)) {
-                handleAccessToken(accessToken, refreshToken, request, response);
+                handleAccessToken(accessToken, refreshToken, response);
             } else if (StringUtils.hasText(refreshToken)) {
                 handleRefreshToken(refreshToken, response);
             }
@@ -42,19 +42,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response); // 다음 필터로 넘어가기
 
         } catch (Exception e) {
-            log.error("Unexpected error during authentication", e);
-            handleInvalidToken(response, "인증 처리 중 오류가 발생했습니다.");
+            handleInvalidToken(response, ErrorCode.AUTHORIZATION_FAILED);
         }
     }
 
-    private void handleAccessToken(String accessToken, String refreshToken, HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    private void handleAccessToken(String accessToken, String refreshToken, HttpServletResponse response) throws IOException {
         try {
             if (tokenProvider.validateToken(accessToken)) {
                 if (!redisHandler.keyExists(accessToken)) {
                     setAuthentication(accessToken); // 토큰이 유효하고 로그아웃 블랙리스트에도 없을 경우, 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
                 } else {
-                    handleInvalidToken(response, "로그아웃된 토큰입니다.");
+                    handleInvalidToken(response, ErrorCode.LOGOUT_TOKEN);
                 }
             } else if (StringUtils.hasText(refreshToken)) {
                 // access token이 유효하지 않을 경우, refresh token 체크
@@ -66,10 +64,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(refreshToken)) {
                 handleRefreshToken(refreshToken, response);
             } else {
-                handleInvalidToken(response, "만료된 액세스 토큰입니다.");
+                handleInvalidToken(response, ErrorCode.UNAUTHORIZED_TOKEN);
             }
         } catch (Exception e) {
-            handleInvalidToken(response, "잘못된 액세스 토큰입니다.");
+            handleInvalidToken(response, ErrorCode.UNAUTHORIZED_TOKEN);
         }
     }
 
@@ -85,19 +83,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setHeader("Authorization", "Bearer " + newAccessToken);
                 // Authentication 설정
                 setAuthentication(newAccessToken);
-            }
-
-            else {
+            } else {
                 // 유효하지 않거나 일치하지 않는 리프레시 토큰 처리
                 logger.error("Refresh token is invalid or expired");
-                handleInvalidToken(response, "인증되지 않는 토큰입니다.");
+                handleInvalidToken(response, ErrorCode.UNAUTHORIZED_TOKEN);
             }
         } catch (ExpiredJwtException e) {
             // 리프레시 토큰 만료 처리
             redisHandler.deleteByKey(refreshToken);
 
             logger.error("Refresh token has expired", e);
-            handleInvalidToken(response, "만료된 토큰입니다.");
+            handleInvalidToken(response, ErrorCode.INVALIDATE_TOKEN);
         } catch (Exception e) {
             // Refresh token 검증 실패 시 로그만 남김
             logger.error("Invalid refresh token", e);
@@ -110,14 +106,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // 토큰 관련 예외 처리
-    private void handleInvalidToken(HttpServletResponse response, String errorMessage)
-            throws IOException {
+    private void handleInvalidToken(HttpServletResponse response, ErrorCode errorCode) throws IOException {
 
-        log.error("에러 메시지: {}", errorMessage);
+        log.error("에러 메시지: {}", errorCode.getMessage());
 
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(errorCode.getHttpStatus().value());
 
         response.setContentType("application/json; charset=UTF-8");
-        response.getWriter().write("{\"message\": \"" + errorMessage + "\", \"result\": null}");
+        response.getWriter().write("{\"message\": \"" + errorCode.getMessage() + "\", \"result\": null}");
     }
 }

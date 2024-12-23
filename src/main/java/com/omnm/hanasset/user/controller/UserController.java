@@ -1,5 +1,6 @@
 package com.omnm.hanasset.user.controller;
 
+import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.user.dto.BirthRequest;
 import com.omnm.hanasset.user.dto.EmailSignInRequest;
 import com.omnm.hanasset.user.dto.EmailSignUpRequest;
@@ -14,10 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -79,5 +78,11 @@ public class UserController {
         return ResponseEntity.ok().body(userResponse);
     }
 
-    
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
+        Long userId = userDetailsDTO.getId();
+        System.out.println("############ 유저 ID: " + userId);
+
+        return ResponseEntity.ok().body(UserResponse.builder().message(userDetailsDTO.getUsername()).build());
+    }
 }
