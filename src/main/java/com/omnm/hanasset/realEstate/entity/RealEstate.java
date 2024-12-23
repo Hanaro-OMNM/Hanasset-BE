@@ -38,10 +38,10 @@ public class RealEstate {
     private Point coordinate;
 
     @Column(name = "deposit")
-    private Integer deposit;
+    private Long deposit;
 
     @Column(name = "price")
-    private Integer price;
+    private Long price;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

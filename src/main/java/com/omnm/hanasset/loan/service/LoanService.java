@@ -64,8 +64,8 @@ public class LoanService {
                     property.getIsHousingFraudVictim(),
                     housingType.getExclusiveAreaSize().intValue(),
                     realEstate.getType(),
-                    realEstate.getDeposit() / 10000,
-                    realEstate.getPrice() / 10000);
+                    (int) (realEstate.getDeposit() / 10000),
+                    (int) (realEstate.getPrice() / 10000));
 
             for (Loan loan : availableLoans) {
                 LoanInfoDTO loanInfoDTO = loanMapper.loanToInfoDTO(loan);
