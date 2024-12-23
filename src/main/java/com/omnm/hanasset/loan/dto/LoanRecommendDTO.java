@@ -1,12 +1,13 @@
 package com.omnm.hanasset.loan.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoanRecommendDTO {
     /**
      * TODO RealEstateDTO 추가
