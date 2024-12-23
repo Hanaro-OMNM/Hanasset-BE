@@ -23,4 +23,11 @@ public class LoanController {
         return ResponseEntity.ok(recommendLoans);
     }
 
+    @GetMapping("/detail/{loanId}")
+    public ResponseEntity<LoanDetailDTO> getLoan(@PathVariable("loanId") Long loanId) {
+        // userId = 1L
+        LoanDetailDTO loan = loanService.getLoan(1L, loanId);
+        return ResponseEntity.ok(loan);
+    }
+
 }
