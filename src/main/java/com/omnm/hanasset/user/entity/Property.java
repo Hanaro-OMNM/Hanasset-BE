@@ -18,7 +18,8 @@ public class Property {
     @JoinColumn(name = "userId")
     private User user;
 
-    private String jobType ;
+    @Column(name = "job_type")
+    private String jobType;
 
     private Integer income;
 
@@ -26,13 +27,18 @@ public class Property {
 
     private Boolean hasHouse;
 
+    @Column(name = "annual_interest")
     private Integer annualInterest;
 
+    @Column(name = "annual_principle")
     private Integer annualPrinciple;
 
+    @Column(name = "is_abnormal_house")
     private Boolean isAbnormalHouse;
 
+    @Column(name = "is_housing_fraud_victim")
     private Boolean isHousingFraudVictim;
 
+    @Column(name = "stress_dsr")
     private Double stressDsr;
 }

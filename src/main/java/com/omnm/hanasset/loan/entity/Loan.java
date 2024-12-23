@@ -1,8 +1,6 @@
 package com.omnm.hanasset.loan.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -11,35 +9,37 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 public class Loan {
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "loan_id")
     private Long loanId;
 
+    @Column(name = "name_text")
     private String nameText;
 
-    @Column(length = 2048)
+    @Column(name = "type_text", columnDefinition = "VARCHAR(2048)")
     private String typeText;
 
-    @Column(length = 2048)
+    @Column(name = "feature_text", columnDefinition = "VARCHAR(2048)")
     private String featureText;
 
-    @Column(length = 2048)
+    @Column(name = "outline_text", columnDefinition = "VARCHAR(2048)")
     private String outlineText;
 
-    @Column(length = 2048)
+    @Column(name = "target_guest_text", columnDefinition = "VARCHAR(2048)")
     private String targetGuestText;
 
-    @Column(length = 2048)
+    @Column(name = "target_house_text", columnDefinition = "VARCHAR(2048)")
     private String targetHouseText;
 
-    @Column(length = 2048)
+    @Column(name = "limit_text", columnDefinition = "VARCHAR(2048)")
     private String limitText;
 
     private String rateText;
 
-    @Column(length = 2048)
+    @Column(name = "period_text", columnDefinition = "VARCHAR(2048)")
     private String periodText;
 
-    @Column(length = 2048)
+    @Column(name = "payback_method_text", columnDefinition = "VARCHAR(2048)")
     private String paybackMethodText;
 
     private String provider;
