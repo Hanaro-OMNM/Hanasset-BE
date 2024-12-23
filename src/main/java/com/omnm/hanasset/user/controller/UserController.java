@@ -36,9 +36,7 @@ public class UserController {
 
         userService.signUp(emailSignUpRequest);
 
-        String redirect_uri = "http://localhost:8080/users/birth";
-
-        return ResponseEntity.ok().header(HttpHeaders.LOCATION, redirect_uri).body(UserResponse.builder().message("이메일 회원가입 성공").build());
+        return ResponseEntity.ok().body(UserResponse.builder().message("이메일 회원가입 성공").build());
     }
 
     @PostMapping("/signin")

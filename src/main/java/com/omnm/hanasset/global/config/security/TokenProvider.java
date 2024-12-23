@@ -61,13 +61,13 @@ public class TokenProvider {
         Duration expiredDuration = Duration.ofMillis(REFRESH_TOKEN_EXPIRE_TIME); // Duration으로 생성
 
         String refreshToken = Jwts.builder()
-//                .setClaims(claims)
+                .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS512, this.secretKey)
                 .compact();
 
-        redisHandler.setValueOperations(username, refreshToken, expiredDuration); // Redis 저장
+        redisHandler.setValueOperations(refreshToken, username, expiredDuration); // Redis 저장
 
         return refreshToken;
     }

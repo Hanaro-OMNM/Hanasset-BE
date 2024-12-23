@@ -35,8 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(accessToken)) {
                 handleAccessToken(accessToken, refreshToken, request, response);
             } else if (StringUtils.hasText(refreshToken)) {
-                String username = tokenProvider.getUsername(accessToken);
-                handleRefreshToken(refreshToken, username, response);
+                handleRefreshToken(refreshToken, response);
             }
 
             filterChain.doFilter(request, response); // 다음 필터로 넘어가기
@@ -47,7 +46,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void handleAccessToken(String accessToken, String refreshToken, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String username = tokenProvider.getUsername(accessToken);
 
         try {
             if (tokenProvider.validateToken(accessToken)) {
@@ -58,13 +56,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             } else if (StringUtils.hasText(refreshToken)) {
                 // access token이 유효하지 않을 경우, refresh token 체크
-                handleRefreshToken(refreshToken, username, response);
+                handleRefreshToken(refreshToken, response);
             }
         } catch (ExpiredJwtException e) {
             log.warn("Access token has expired", e);
 
             if (StringUtils.hasText(refreshToken)) {
-                handleRefreshToken(refreshToken, username, response);
+                handleRefreshToken(refreshToken, response);
             } else {
                 handleInvalidToken(response, "만료된 액세스 토큰입니다.");
             }
@@ -74,13 +72,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private void handleRefreshToken(String refreshToken, String username, HttpServletResponse response) throws IOException {
+    private void handleRefreshToken(String refreshToken, HttpServletResponse response) throws IOException {
         try {
-            String storedToken = redisHandler.getValue(username);
+            String username = tokenProvider.getUsername(refreshToken);
+            String storedName = redisHandler.getValue(refreshToken);
 
-            if (refreshToken.equals(storedToken) && tokenProvider.validateToken(refreshToken)) {
+            if (username.equals(storedName) && tokenProvider.validateToken(refreshToken)) {
                 // Refresh token이 유효하면 새로운 Access token 발급
-
                 String newAccessToken = tokenProvider.generateAccessToken(username);
                 // 새로운 Access token을 헤더에 추가
                 response.setHeader("Authorization", "Bearer " + newAccessToken);
@@ -95,7 +93,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (ExpiredJwtException e) {
             // 리프레시 토큰 만료 처리
-            redisHandler.deleteByKey(username);
+            redisHandler.deleteByKey(refreshToken);
 
             logger.error("Refresh token has expired", e);
             handleInvalidToken(response, "만료된 토큰입니다.");

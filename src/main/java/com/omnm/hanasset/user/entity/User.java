@@ -15,14 +15,14 @@ import java.time.LocalDate;
 @Entity(name = "USER")
 public class User {
     @Id
-    @Column(name = "userId", nullable = false)
+    @Column(name = "user_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
