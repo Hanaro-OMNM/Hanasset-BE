@@ -4,7 +4,6 @@ import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShowAreaCodeDTO {

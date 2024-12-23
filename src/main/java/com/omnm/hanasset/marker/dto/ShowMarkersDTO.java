@@ -5,7 +5,6 @@ import lombok.*;
 
 @Schema(description = "근처 지역 마커")
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

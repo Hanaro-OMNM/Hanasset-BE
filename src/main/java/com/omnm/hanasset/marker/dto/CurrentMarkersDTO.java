@@ -5,7 +5,6 @@ import lombok.*;
 
 @Schema(description = "현재 지역 마커")
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

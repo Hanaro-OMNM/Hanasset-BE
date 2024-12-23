@@ -7,7 +7,6 @@ import java.util.List;
 
 @Schema(description = "지역 마커 응답")
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
