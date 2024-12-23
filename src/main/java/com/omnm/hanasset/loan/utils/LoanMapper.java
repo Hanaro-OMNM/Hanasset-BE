@@ -1,10 +1,28 @@
 package com.omnm.hanasset.loan.utils;
 
+import com.omnm.hanasset.loan.dto.LoanDetailDTO;
 import com.omnm.hanasset.loan.dto.LoanInfoDTO;
 import com.omnm.hanasset.loan.entity.Loan;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface LoanMapper {
-    LoanInfoDTO loanToDTO(Loan loan);
+    @Mapping(source = "nameText", target = "name")
+    @Mapping(source = "rateText", target = "rate")
+    @Mapping(source = "limitText", target = "limit")
+    LoanInfoDTO loanToInfoDTO(Loan loan);
+
+    @Mapping(source = "nameText", target = "name")
+    @Mapping(source = "typeText", target = "type")
+    @Mapping(source = "outlineText", target = "outline")
+    @Mapping(source = "limitText", target = "limit")
+    @Mapping(source = "rateText", target = "rate")
+    @Mapping(source = "featureText", target = "feature")
+    @Mapping(source = "targetGuestText", target = "targetGuest")
+    @Mapping(source = "targetHouseText", target = "targetHouse")
+    @Mapping(source = "periodText", target = "period")
+    @Mapping(source = "paybackMethodText", target = "paybackMethod")
+    LoanDetailDTO loanToDetailDTO(Loan loan);
 }

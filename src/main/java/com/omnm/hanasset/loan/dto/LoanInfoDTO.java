@@ -7,8 +7,8 @@ import lombok.Data;
 @Builder
 public class LoanInfoDTO {
     private Long loanId;
-    private String nameText;
-    private String rateText;
-    private String limitText;
+    private String name;
+    private String rate;
+    private String limit;
     private String dsr;
 }
