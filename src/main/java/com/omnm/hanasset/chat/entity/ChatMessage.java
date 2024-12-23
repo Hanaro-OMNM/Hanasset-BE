@@ -6,11 +6,13 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
+
+@ToString
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "chat_message")
 public class ChatMessage {
     @Id

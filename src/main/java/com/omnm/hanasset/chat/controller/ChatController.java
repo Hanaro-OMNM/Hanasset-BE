@@ -30,11 +30,11 @@ public class ChatController {
     /**
      * 메시지 발행: 채팅방 ID를 기반으로 Stream에 메시지 추가
      */
-    @PostMapping("/publish")
-    public String publishMessage(@RequestParam String chatroomId, @RequestBody ChatMessageDTO message) {
-        publisher.publishMessage(chatroomId, message);
-        return "Message published to chatroom: " + chatroomId;
-    }
+//    @PostMapping("/publish")
+//    public String publishMessage(@RequestParam String chatroomId, @RequestBody ChatMessageDTO message) {
+//        publisher.publishMessage(chatroomId, message);
+//        return "Message published to chatroom: " + chatroomId;
+//    }
 
     @MessageMapping("/chat.sendMessage/{roomId}")
     @SendTo("/topic/rooms/{roomId}")
@@ -49,11 +49,11 @@ public class ChatController {
     /**
      * 메시지 구독: 채팅방 ID를 기반으로 메시지 소비
      */
-    @GetMapping("/consume")
-    public List<ChatMessageDTO> consumeMessages(@RequestParam String chatroomId) {
-        List<ChatMessageDTO> consumedMessages = subscriber.consumeMessages(chatroomId);
-        return consumedMessages; // 메시지 목록 반환
-    }
+//    @GetMapping("/consume")
+//    public List<ChatMessageDTO> consumeMessages(@RequestParam String chatroomId) {
+//        List<ChatMessageDTO> consumedMessages = subscriber.consumeMessages(chatroomId);
+//        return consumedMessages; // 메시지 목록 반환
+//    }
 
     /**
      * WebSocket 연결 시 Redis에서 메시지 기록을 불러와 클라이언트로 전송

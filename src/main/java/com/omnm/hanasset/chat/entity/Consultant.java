@@ -1,17 +1,15 @@
 package com.omnm.hanasset.chat.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import jakarta.persistence.*;
 
-@Entity
+@ToString
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "consultant")
 public class Consultant {
     @Id

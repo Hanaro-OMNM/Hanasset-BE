@@ -9,6 +9,7 @@ import com.omnm.hanasset.global.common.ApiResponseEntity;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Tag(name = "채팅룸 관리", description = "채팅룸 관련 API 목록")
 @RequestMapping("/chat")
 @RequiredArgsConstructor
 @RestController

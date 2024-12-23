@@ -1,6 +1,6 @@
 package com.omnm.hanasset.chat.dto;
 
-
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.util.List;
@@ -9,8 +9,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "채팅 메시지 응답 DTO")
 public class ChatMessageResponse {
-    private Integer count;
-    private List<ChatMessageDTO> chatMessages;
 
+    @Schema(description = "총 메시지 수")
+    private Integer count;
+
+    @Schema(description = "채팅 메시지 목록")
+    private List<ChatMessageDTO> chatMessages;
 }
