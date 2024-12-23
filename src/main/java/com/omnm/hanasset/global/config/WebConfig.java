@@ -1,4 +1,4 @@
-package com.omnm.hanasset.config;
+package com.omnm.hanasset.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
