@@ -1,6 +1,6 @@
 package com.omnm.hanasset.loan.utils;
 
-import com.omnm.hanasset.loan.dto.LoanDetailDTO;
+import com.omnm.hanasset.loan.dto.LoanDetailResponse;
 import com.omnm.hanasset.loan.dto.LoanInfoDTO;
 import com.omnm.hanasset.loan.entity.Loan;
 import org.mapstruct.Mapper;
@@ -24,5 +24,5 @@ public interface LoanMapper {
     @Mapping(source = "targetHouseText", target = "targetHouse")
     @Mapping(source = "periodText", target = "period")
     @Mapping(source = "paybackMethodText", target = "paybackMethod")
-    LoanDetailDTO loanToDetailDTO(Loan loan);
+    LoanDetailResponse loanToDetailResponse(Loan loan);
 }

@@ -1,8 +1,8 @@
 package com.omnm.hanasset.loan.service;
 
-import com.omnm.hanasset.loan.dto.LoanDetailDTO;
+import com.omnm.hanasset.loan.dto.LoanDetailResponse;
 import com.omnm.hanasset.loan.dto.LoanInfoDTO;
-import com.omnm.hanasset.loan.dto.LoanRecommendDTO;
+import com.omnm.hanasset.loan.dto.LoanRecommendInfoDTO;
 import com.omnm.hanasset.loan.dto.LoanResponse;
 import com.omnm.hanasset.loan.entity.Loan;
 import com.omnm.hanasset.loan.repository.LoanRepository;
@@ -48,7 +48,7 @@ public class LoanService {
          * 전세: deposit만 비교
          * 월세: deposit과 price 비교
          */
-        List<LoanRecommendDTO> loanRecommendDTOs = new ArrayList<>();
+        List<LoanRecommendInfoDTO> loanRecommendInfoDTOS = new ArrayList<>();
 
         for (RealEstate realEstate : realEstates) {
             List<LoanInfoDTO> hanaLoans = new ArrayList<>();
@@ -80,7 +80,7 @@ public class LoanService {
             /**
              * TODO RealEstateDTO 추가 필요
              */
-            loanRecommendDTOs.add(LoanRecommendDTO.builder()
+            loanRecommendInfoDTOS.add(LoanRecommendInfoDTO.builder()
                     .hanaLoans(hanaLoans)
                     .beotimmokLoans(beotimmokLoans)
                     .build());
@@ -90,15 +90,15 @@ public class LoanService {
          * TODO GuestDTO 추가 필요
          */
         return LoanResponse.builder()
-                .loanRecommendDTOS(loanRecommendDTOs)
+                .loanRecommendInfoDTOS(loanRecommendInfoDTOS)
                 .build();
     }
 
-    public LoanDetailDTO getLoan(Long userId, Long loanId) {
+    public LoanDetailResponse getLoan(Long userId, Long loanId) {
         // Exception 임시 처리
         Property property = propertyRepository.findByUser_UserId(userId).orElseThrow();
         Loan loan = loanRepository.findById(loanId).orElseThrow();
-        LoanDetailDTO loanDetailDTO = loanMapper.loanToDetailDTO(loan);
+        LoanDetailResponse loanDetailDTO = loanMapper.loanToDetailResponse(loan);
         loanDetailDTO.setDsr(String.format("%.2f", getNewDSR(property, loan)));
         return loanDetailDTO;
     }
