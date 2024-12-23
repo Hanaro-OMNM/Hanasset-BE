@@ -1,10 +1,13 @@
 package com.omnm.hanasset.socialLogin.service;
 
-import com.omnm.hanasset.socialLogin.dto.*;
+import com.omnm.hanasset.socialLogin.dto.NaverLogoutResponse;
+import com.omnm.hanasset.socialLogin.dto.NaverTokenResponse;
+import com.omnm.hanasset.socialLogin.dto.NaverUserInfoResponse;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
