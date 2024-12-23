@@ -1,6 +1,7 @@
 package com.omnm.hanasset.global.config.security;
 
 import com.omnm.hanasset.global.config.RedisHandler;
+import com.omnm.hanasset.global.exception.CustomException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -39,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             filterChain.doFilter(request, response); // 다음 필터로 넘어가기
+
         } catch (Exception e) {
             log.error("Unexpected error during authentication", e);
             handleInvalidToken(response, "인증 처리 중 오류가 발생했습니다.");
