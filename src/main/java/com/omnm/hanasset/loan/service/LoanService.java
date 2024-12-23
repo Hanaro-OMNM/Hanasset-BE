@@ -1,5 +1,6 @@
 package com.omnm.hanasset.loan.service;
 
+import com.omnm.hanasset.loan.dto.LoanDetailDTO;
 import com.omnm.hanasset.loan.dto.LoanInfoDTO;
 import com.omnm.hanasset.loan.dto.LoanRecommendDTO;
 import com.omnm.hanasset.loan.dto.LoanResponse;
@@ -67,7 +68,7 @@ public class LoanService {
                     realEstate.getPrice() / 10000);
 
             for (Loan loan : availableLoans) {
-                LoanInfoDTO loanInfoDTO = loanMapper.loanToDTO(loan);
+                LoanInfoDTO loanInfoDTO = loanMapper.loanToInfoDTO(loan);
                 loanInfoDTO.setDsr(String.format("%.2f", getNewDSR(property, loan)));
                 if (loan.getProvider().equalsIgnoreCase("하나")) {
                     hanaLoans.add(loanInfoDTO);
@@ -75,6 +76,7 @@ public class LoanService {
                     beotimmokLoans.add(loanInfoDTO);
                 }
             }
+
             /**
              * TODO RealEstateDTO 추가 필요
              */
@@ -90,6 +92,15 @@ public class LoanService {
         return LoanResponse.builder()
                 .loanRecommendDTOS(loanRecommendDTOs)
                 .build();
+    }
+
+    public LoanDetailDTO getLoan(Long userId, Long loanId) {
+        // Exception 임시 처리
+        Property property = propertyRepository.findByUser_UserId(userId).orElseThrow();
+        Loan loan = loanRepository.findById(loanId).orElseThrow();
+        LoanDetailDTO loanDetailDTO = loanMapper.loanToDetailDTO(loan);
+        loanDetailDTO.setDsr(String.format("%.2f", getNewDSR(property, loan)));
+        return loanDetailDTO;
     }
 
     private Double getNewDSR(Property property, Loan loan) {
@@ -124,7 +135,4 @@ public class LoanService {
         Double totalInterest = loan.getLimitAmount() * rate / 12 * loan.getMaxPeriod();
         return (int) (loan.getLimitAmount() + totalInterest) / loan.getMaxPeriod();
     }
-
-
-
 }
