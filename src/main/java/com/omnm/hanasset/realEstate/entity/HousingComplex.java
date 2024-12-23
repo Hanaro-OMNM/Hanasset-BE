@@ -2,15 +2,13 @@ package com.omnm.hanasset.realEstate.entity;
 
 import com.omnm.hanasset.areaCode.entity.AreaCode;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@ToString
 @Getter
 @Builder
 @NoArgsConstructor
