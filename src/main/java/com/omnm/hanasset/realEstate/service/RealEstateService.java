@@ -1,5 +1,7 @@
 package com.omnm.hanasset.realEstate.service;
 
+import com.omnm.hanasset.global.exception.CustomException;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.realEstate.dto.*;
 import com.omnm.hanasset.realEstate.entity.RealEstate;
 import com.omnm.hanasset.realEstate.repository.RealEstateRepository;
@@ -29,21 +31,27 @@ public class RealEstateService {
                 .build();
     }
 
+    public RealEstateMarketPriceResponse getRealEstateMarketPrice(Long realEstateId) {
+        RealEstate realEstate = realEstateRepository.findById(realEstateId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REAL_ESTATE_NOT_FOUND));
+        return realEstateMapper.toRealEstateMarketPriceResponse(realEstate);
+    }
+
     public RealEstateBasicResponse getRealEstateBasic(Long realEstateId) {
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 부동산이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.REAL_ESTATE_NOT_FOUND));
         return realEstateMapper.toRealEstateBasicResponse(realEstate.getHousingType().getHousingComplex());
     }
 
     public RealEstateTypeResponse getRealEstateType(Long realEstateId) {
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 부동산이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.REAL_ESTATE_NOT_FOUND));
         return realEstateMapper.toRealEstateTypeResponse(realEstate.getHousingType());
     }
 
     public RealEstateDetailResponse getRealEstateDetail(Long realEstateId) {
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 부동산이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.REAL_ESTATE_NOT_FOUND));
         return realEstateMapper.toRealEstateDetailResponse(realEstate);
     }
 }
