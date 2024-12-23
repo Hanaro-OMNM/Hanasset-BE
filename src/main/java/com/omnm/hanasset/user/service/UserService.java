@@ -2,10 +2,9 @@ package com.omnm.hanasset.user.service;
 
 import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.global.config.security.TokenProvider;
-import com.omnm.hanasset.user.dto.BirthRequest;
-import com.omnm.hanasset.user.dto.EmailSignInRequest;
-import com.omnm.hanasset.user.dto.EmailSignUpRequest;
-import com.omnm.hanasset.user.dto.UserResponse;
+import com.omnm.hanasset.global.exception.CustomException;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
+import com.omnm.hanasset.user.dto.*;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.exception.EmailException;
 import com.omnm.hanasset.user.repository.UserRepository;
@@ -65,16 +64,23 @@ public class UserService {
         user.updateBirthDate(birth.getBirthDate());
     }
 
-    public UserResponse logout(HttpServletRequest request) {
+    public String logout(HttpServletRequest request) {
         String accessToken = tokenProvider.resolveTokenFromRequest(request);
         String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request);
 
         if (StringUtils.hasText(accessToken) && StringUtils.hasText(refreshToken)) {
             tokenProvider.destoryToken(accessToken, refreshToken);
-            return UserResponse.builder().message("로그아웃 성공").build();
+            return "로그아웃 성공";
         }
 
-        return UserResponse.builder().message("ERROR").build();
+        return "ERROR";
+    }
+
+    @Transactional
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return UserInfoResponse.builder().name(user.getName()).email(user.getEmail()).birthDate(user.getBirthDate()).build();
     }
 
     private void isEmailExists (String email) {

@@ -2,10 +2,8 @@ package com.omnm.hanasset.user.controller;
 
 import com.omnm.hanasset.global.common.ApiResponseEntity;
 import com.omnm.hanasset.global.dto.UserDetailsDTO;
-import com.omnm.hanasset.user.dto.BirthRequest;
-import com.omnm.hanasset.user.dto.EmailSignInRequest;
-import com.omnm.hanasset.user.dto.EmailSignUpRequest;
-import com.omnm.hanasset.user.dto.UserResponse;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
+import com.omnm.hanasset.user.dto.*;
 import com.omnm.hanasset.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,21 +66,21 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<UserResponse> logout(HttpServletRequest request) {
-        UserResponse userResponse = userService.logout(request);
+    public ApiResponseEntity logout(HttpServletRequest request) {
+        String logoutResult = userService.logout(request);
 
-        if (userResponse.getMessage().equals("ERROR")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(UserResponse.builder().message("유효하지 않은 요청입니다.").build());
+        if (logoutResult.equals("ERROR")) {
+            return ApiResponseEntity.fail(ErrorCode.BAD_REQUEST);
         }
 
-        return ResponseEntity.ok().body(userResponse);
+        return ApiResponseEntity.ok(logoutResult, null);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
+    public ApiResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
         Long userId = userDetailsDTO.getId();
+        UserInfoResponse userInfo = userService.getUserInfo(userId);
 
-        return ResponseEntity.ok().body(UserResponse.builder().message(userDetailsDTO.getUsername()).build());
+        return ApiResponseEntity.ok("회원 정보 조회 성공", userInfo);
     }
 }
