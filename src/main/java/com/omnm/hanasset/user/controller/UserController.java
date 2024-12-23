@@ -1,5 +1,6 @@
 package com.omnm.hanasset.user.controller;
 
+import com.omnm.hanasset.global.common.ApiResponseEntity;
 import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.user.dto.BirthRequest;
 import com.omnm.hanasset.user.dto.EmailSignInRequest;
@@ -30,12 +31,12 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<UserResponse> signup(
+    public ApiResponseEntity signup(
             @RequestBody @Valid EmailSignUpRequest emailSignUpRequest, HttpServletResponse response) throws IOException {
 
         userService.signUp(emailSignUpRequest);
 
-        return ResponseEntity.ok().body(UserResponse.builder().message("이메일 회원가입 성공").build());
+        return ApiResponseEntity.ok("이메일 회원가입 성공", null);
     }
 
     @PostMapping("/signin")
@@ -60,10 +61,10 @@ public class UserController {
     }
 
     @PostMapping("/birth")
-    public ResponseEntity<UserResponse> birth(@RequestBody @Valid BirthRequest birthRequest) {
+    public ApiResponseEntity birth(@RequestBody @Valid BirthRequest birthRequest) {
         userService.setBirthDate(birthRequest);
 
-        return ResponseEntity.ok().body(UserResponse.builder().message("생년월일 입력 성공").build());
+        return ApiResponseEntity.ok("생년월일 입력 성공", null);
     }
 
     @PostMapping("/logout")
@@ -81,7 +82,6 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
         Long userId = userDetailsDTO.getId();
-        System.out.println("############ 유저 ID: " + userId);
 
         return ResponseEntity.ok().body(UserResponse.builder().message(userDetailsDTO.getUsername()).build());
     }
