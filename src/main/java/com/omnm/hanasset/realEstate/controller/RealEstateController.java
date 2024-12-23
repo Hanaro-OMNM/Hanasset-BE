@@ -1,10 +1,7 @@
 package com.omnm.hanasset.realEstate.controller;
 
 import com.omnm.hanasset.global.common.ApiResponseEntity;
-import com.omnm.hanasset.realEstate.dto.RealEstateBasicResponse;
-import com.omnm.hanasset.realEstate.dto.RealEstateDetailResponse;
-import com.omnm.hanasset.realEstate.dto.RealEstateTypeResponse;
-import com.omnm.hanasset.realEstate.dto.RealEstatesResponse;
+import com.omnm.hanasset.realEstate.dto.*;
 import com.omnm.hanasset.realEstate.service.RealEstateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,6 +22,14 @@ public class RealEstateController {
     public ApiResponseEntity<RealEstatesResponse> getRealEstates(@RequestParam Long housingComplexId) {
         RealEstatesResponse realEstates = realEstateService.getRealEstates(housingComplexId);
         return ApiResponseEntity.ok("매물 리스트 조회 성공",realEstates);
+    }
+
+    @Operation(summary = "시세 정보 조회", description = "특정 매물의 시세 정보 조회를 위한 외부 API 호출에 필요한 정보를 조회한다.")
+    @ApiResponse(responseCode = "200", description = "시세 정보 조회 성공")
+    @GetMapping("/{realEstateId}/market-price")
+    public ApiResponseEntity<RealEstateMarketPriceResponse> getRealEstateMarketPrice(@PathVariable Long realEstateId) {
+        RealEstateMarketPriceResponse realEstateMarketPrice = realEstateService.getRealEstateMarketPrice(realEstateId);
+        return ApiResponseEntity.ok("시세 조회에 필요한 정보 조회 성공", realEstateMarketPrice);
     }
 
     @Operation(summary = "기본 정보 조회", description = "특정 매물의 기본 정보를 조회한다.")
