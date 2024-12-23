@@ -10,14 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ChatMessageResponse {
-    private String message;
-    private Result result;
+    private Integer count;
+    private List<ChatMessageDTO> chatMessages;
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Result {
-        private List<ChatMessageDTO> chatMessageResponse;
-    }
 }

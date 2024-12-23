@@ -11,8 +11,8 @@ import org.mapstruct.Mapping;
 public interface ChatMapper {
 
     // ChatMessage 엔티티 -> ChatMessageDTO로 변환
-    @Mapping(source = "messageType", target = "messageType", qualifiedByName = "stringToMessageType")
-    @Mapping(source = "chatroomId", target = "chatroomId", qualifiedByName = "longToString")
+    @Mapping(source = "messageType", target = "messageType")
+    @Mapping(source = "chatroomId", target = "chatroomId")
     @Mapping(source = "senderId", target = "senderId")
     @Mapping(source = "content", target = "content")
     @Mapping(source = "accessor", target = "accessor")
@@ -31,8 +31,8 @@ public interface ChatMapper {
     ChatRoomDTO toChatRoomDTO(ChatRoom chatRoom);
 
     // ChatMessageDTO -> ChatMessage 엔티티로 변환
-    @Mapping(source = "messageType", target = "messageType", qualifiedByName = "stringToMessageType")
-    @Mapping(source = "chatroomId", target = "chatroomId", qualifiedByName = "stringToLong")
+    @Mapping(source = "messageType", target = "messageType")
+    @Mapping(source = "chatroomId", target = "chatroomId")
     @Mapping(source = "senderId", target = "senderId")
     @Mapping(source = "content", target = "content")
     @Mapping(source = "accessor", target = "accessor")

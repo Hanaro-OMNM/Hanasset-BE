@@ -2,6 +2,9 @@ package com.omnm.hanasset.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omnm.hanasset.chat.dto.ChatMessageDTO;
+import com.omnm.hanasset.chat.dto.ChatMessageResponse;
+import com.omnm.hanasset.chat.dto.ChatroomResponse;
 import com.omnm.hanasset.chat.entity.ChatMessage;
 import com.omnm.hanasset.chat.entity.ChatRoom;
 import com.omnm.hanasset.chat.redis.service.RedisStreamSubscriber;
@@ -9,7 +12,7 @@ import com.omnm.hanasset.chat.repository.ChatMessageRepository;
 import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.utils.ChatMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -29,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 @Service
 public class ChatRoomService {
 
@@ -43,60 +46,49 @@ public class ChatRoomService {
     private final ObjectMapper objectMapper;
     private static final String CHATROOM_KEY_PREFIX = "chatroom:";
 
-    public List<ChatRoom> findAll() {
-        return chatRoomRepository.findAll();
+    public ChatroomResponse findAll() {
+        List<ChatRoom> allChatrooms = chatRoomRepository.findAll();
+
+        List<ChatRoomDTO> chatRoomDTOList = allChatrooms.stream()
+                .map(chatMapper::toChatRoomDTO)
+                .collect(Collectors.toList());
+
+        return new ChatroomResponse(chatRoomDTOList.size(), chatRoomDTOList);
     }
 
 
 
-    public ChatRoomDTO createRoom(Long userId, Long consultantId,String chatroomTitle, LocalDateTime reservedTime) {
 
-        // DTO -> Entity 변환
+    public ChatroomResponse createRoom(Long userId, Long consultantId, String chatroomTitle, LocalDateTime reservedTime) {
+
         ChatRoom chatRoomEntity = ChatRoom.builder()
-                .chatroomId(UUID.randomUUID().toString()) // UUID 수동 생성
-                .userId(userId) // userId 추가
-                .consultantId(consultantId) // consultantId 추가
+                .chatroomId(UUID.randomUUID().toString())
+                .userId(userId)
+                .consultantId(consultantId)
                 .chatroomTitle(chatroomTitle)
                 .chatroomStatus("waiting")
                 .createdAt(LocalDateTime.now())
                 .reservedTime(reservedTime)
                 .build();
 
-        log.info("Saving ChatRoom Entity: {}", chatRoomEntity); // 저장 직전 로그 출력
-
-        // 저장소에 Entity 저장
+        log.info("Saving ChatRoom Entity: {}", chatRoomEntity);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoomEntity);
+        log.info("Saved ChatRoom Entity: {}", savedChatRoom);
 
-        log.info("Saved ChatRoom Entity: {}", savedChatRoom); // 저장 후 로그 출력
-
-        // ChatRoom -> ChatRoomDTO 변환 (ChatMapper 사용)
         ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(savedChatRoom);
-
-        // 채팅방 ID 기반 Stream Key 생성
         String streamKey = "stream_" + chatRoomDTO.getChatroomId();
         String groupName = "group_" + chatRoomDTO.getChatroomId();
-        String groupTestName = "group_test_" + chatRoomDTO.getChatroomId();
 
-
-        //Stream 생성
         try {
-            // ChatRoomDTO를 JSON 문자열로 변환
             String json = objectMapper.writeValueAsString(chatRoomDTO);
-
-            // Redis Stream에 JSON 메시지 저장
             redisTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
-            // 1. 소비자 그룹 생성 (없으면 생성)
             createConsumerGroup(streamKey, groupName);
-            createConsumerGroup(streamKey, groupTestName);
-
-            // 로그 기록
             log.info("Chat room information published to stream '{}': {}", streamKey, json);
         } catch (Exception e) {
-            // Redis 메시지 추가 실패 처리
             log.error("Error while publishing chat room information to stream '{}': {}", streamKey, e.getMessage(), e);
         }
 
-        // 오늘 날짜일 경우 waiting room에 추가
+        // Waiting room 처리
         if (reservedTime.toLocalDate().equals(LocalDate.now())) {
             String redisKey = "consultant:" + consultantId + ":waiting_rooms";
             try {
@@ -106,7 +98,8 @@ public class ChatRoomService {
                 log.error("Error syncing new room to Redis: {}", e.getMessage());
             }
         }
-        return chatRoomDTO;
+
+        return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
     }
 
     public void deleteRoom(String chatroomId) {
@@ -189,16 +182,15 @@ public class ChatRoomService {
         }
     }
 
-    public List<ChatRoomDTO> getWaitingRooms(Long consultantId) {
+    // 대기방 조회
+    public ChatroomResponse getWaitingRooms(Long consultantId) {
         String streamKey = "consultant:" + consultantId + ":waiting_rooms";
         List<ChatRoomDTO> chatRooms = new ArrayList<>();
 
-        // 1. Redis에서 대기방 데이터 조회
         try {
             List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
                     .read(StreamReadOptions.empty().block(Duration.ofMillis(500)),
                             StreamOffset.create(streamKey, ReadOffset.from("0")));
-
             if (messages != null && !messages.isEmpty()) {
                 for (MapRecord<String, Object, Object> message : messages) {
                     Map<Object, Object> rawData = message.getValue();
@@ -213,22 +205,17 @@ public class ChatRoomService {
             log.error("Error fetching waiting rooms from Redis: {}", e.getMessage());
         }
 
-        // 2. Redis에 데이터가 없으면 MySQL에서 조회
         if (chatRooms.isEmpty()) {
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-            List<ChatRoom> waitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(
-                    consultantId, startOfDay, endOfDay);
-
+            List<ChatRoom> waitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId, startOfDay, endOfDay);
             chatRooms = waitingRooms.stream()
                     .map(chatMapper::toChatRoomDTO)
                     .collect(Collectors.toList());
-
-            // 3. Redis에 동기화
             syncWaitingRoomsToRedis(streamKey, chatRooms);
         }
 
-        return chatRooms;
+        return new ChatroomResponse(chatRooms.size(), chatRooms);
     }
 
     private void syncWaitingRoomsToRedis(String streamKey, List<ChatRoomDTO> chatRooms) {
@@ -242,7 +229,7 @@ public class ChatRoomService {
         }
     }
 
-    public void removeRoomFromRedis(String chatroomId, Long consultantId) {
+    private void removeRoomFromRedis(String chatroomId, Long consultantId) {
         String streamKey = "consultant:" + consultantId + ":waiting_rooms";
         try {
             // Redis Stream에서 해당 chatroomId와 일치하는 메시지 삭제
@@ -268,36 +255,30 @@ public class ChatRoomService {
         }
     }
 
-    public ChatRoomDTO updateChatRoomStatus(String chatroomId, String currentState, String newState) {
-        // 상태 업데이트
+    public ChatroomResponse updateChatRoomStatus(String chatroomId, String currentState, String newState) {
         int rowsUpdated = chatRoomRepository.updateStatusByChatroomId(chatroomId, currentState, newState);
         if (rowsUpdated == 0) {
             throw new RuntimeException("No ChatRoom found : " + chatroomId + " with status: " + currentState);
         }
 
-        // 업데이트된 채팅방 조회
         ChatRoom updatedChatRoom = chatRoomRepository.findByChatroomId(chatroomId)
                 .orElseThrow(() -> new RuntimeException("Failed to fetch updated ChatroomId for userId: " + chatroomId));
 
-
         log.info("ChatRoom [{}] status updated to '{}'.", updatedChatRoom.getChatroomId(), newState);
 
-        // 2. Redis에서 상태 변경 반영 (waiting -> active일 경우 삭제)
         if ("waiting".equals(currentState) && "active".equals(newState)) {
             try {
                 removeRoomFromRedis(updatedChatRoom.getChatroomId(), updatedChatRoom.getConsultantId());
             } catch (Exception e) {
-                log.error("Error removing room [{}] from Redis: {}",updatedChatRoom.getChatroomId(), e.getMessage());
+                log.error("Error removing room [{}] from Redis: {}", updatedChatRoom.getChatroomId(), e.getMessage());
             }
         }
 
-
-        // ChatRoom -> ChatRoomDTO 변환 (ChatMapper 사용)
-        ChatRoomDTO updatedChatRoomDTO = chatMapper.toChatRoomDTO(updatedChatRoom);
-
-        // 변환된 DTO 반환
-        return updatedChatRoomDTO;
+        // ChatRoomDTO로 변환 후 ChatroomResponse에 포함
+        ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(updatedChatRoom);
+        return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
     }
+
 
 
     public String findRoomId(Long userId, String chatroomStatus) {
@@ -329,13 +310,23 @@ public class ChatRoomService {
         return roomId;
     }
 
-    public List<ChatRoom> getCompletedChatroomsByUserId(Long userId) {
-        return chatRoomRepository.findCompletedChatroomsByUserId(userId);
+    public ChatroomResponse getCompletedChatroomsByUserId(Long userId) {
+        List<ChatRoom> completedChatrooms = chatRoomRepository.findCompletedChatroomsByUserId(userId);
+
+        List<ChatRoomDTO> chatRoomDTOList = completedChatrooms.stream()
+                .map(chatMapper::toChatRoomDTO)
+                .collect(Collectors.toList());
+
+        return new ChatroomResponse(chatRoomDTOList.size(), chatRoomDTOList);
     }
 
-    // 2. Find messages for a specific chatroom
-    public List<ChatMessage> getMessagesByChatroomId(String chatroomId) {
-        return chatMessageRepository.findMessagesByChatroomId(chatroomId);
+
+    public ChatMessageResponse getMessagesByChatroomId(String chatroomId) {
+        List<ChatMessage> chatMessages = chatMessageRepository.findMessagesByChatroomId(chatroomId);
+        List<ChatMessageDTO> chatMessageDTOList = chatMessages.stream()
+                .map(chatMapper::toChatMessageDTO)
+                .collect(Collectors.toList());
+        return new ChatMessageResponse(chatMessageDTOList.size(), chatMessageDTOList);
     }
 
 
