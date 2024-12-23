@@ -75,9 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void handleRefreshToken(String refreshToken, HttpServletResponse response) throws IOException {
         try {
             String username = tokenProvider.getUsername(refreshToken);
-            String storedName = redisHandler.getValue(refreshToken);
+            String storedUsername = redisHandler.getValue(refreshToken);
 
-            if (username.equals(storedName) && tokenProvider.validateToken(refreshToken)) {
+            if (username.equals(storedUsername) && tokenProvider.validateToken(refreshToken)) {
                 // Refresh token이 유효하면 새로운 Access token 발급
                 String newAccessToken = tokenProvider.generateAccessToken(username);
                 // 새로운 Access token을 헤더에 추가

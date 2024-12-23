@@ -37,9 +37,10 @@ public class SecurityConfig {
                                 .requestMatchers("/users/signup/**").permitAll()
                                 .requestMatchers("/users/birth/**").permitAll()
                                 .requestMatchers("/users/logout/**").permitAll()
+                                .requestMatchers("/swagger", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/swagger-resources/**").permitAll()
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                                .requestMatchers("/error/**").permitAll() // 임시
+                                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
+                                .requestMatchers("/error/**", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg").permitAll() // 임시
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 );
 
