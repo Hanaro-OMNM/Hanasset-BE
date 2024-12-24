@@ -65,8 +65,14 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ApiResponseEntity logout(HttpServletRequest request) {
+    public ApiResponseEntity logout(HttpServletRequest request, HttpServletResponse response) {
         String logoutResult = userService.logout(request);
+        Cookie refreshTokenCookie = new Cookie("refreshToken", null); // 값 설정 없이 null로 초기화
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(0);
+        response.addCookie(refreshTokenCookie);
 
         if (logoutResult.equals("ERROR")) {
             return ApiResponseEntity.fail(ErrorCode.BAD_REQUEST);
