@@ -15,9 +15,9 @@ public class LoanInfoDTO {
     @Schema(description = "대출 상품 이름")
     private String name;
     @Schema(description = "대출 금리")
-    private String rate;
+    private Double rate;
     @Schema(description = "대출 한도")
-    private String limit;
+    private Integer limitAmount;
     @Schema(description = "갱신 dsr")
-    private String dsr;
+    private Double dsr;
 }

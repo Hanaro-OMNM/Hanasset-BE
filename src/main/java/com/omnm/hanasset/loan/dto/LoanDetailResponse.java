@@ -12,16 +12,16 @@ import lombok.*;
 public class LoanDetailResponse {
     @Schema(description = "대출 상품 ID")
     private Long loanId;
-    @Schema(description = "대출 상품 이름")
-    private String name;
     @Schema(description = "대출 상품 종류, [전월세, 버팀목]")
     private String type;
+    @Schema(description = "대출 상품 이름")
+    private String name;
     @Schema(description = "요약")
     private String outline;
     @Schema(description = "대출 한도")
-    private String limit;
+    private Integer limitAmount;
     @Schema(description = "대출 금리")
-    private String rate;
+    private Double rate;
     @Schema(description = "대출 특징")
     private String feature;
     @Schema(description = "대상 고객")
@@ -33,5 +33,5 @@ public class LoanDetailResponse {
     @Schema(description = "상환 방식")
     private String paybackMethod;
     @Schema(description = "갱신 dsr")
-    private String dsr;
+    private Double dsr;
 }

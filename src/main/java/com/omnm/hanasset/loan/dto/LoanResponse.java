@@ -14,5 +14,5 @@ public class LoanResponse {
      * TODO GuestDTO 추가
      * GuestDTO guest;
      */
-    List<LoanRecommendInfoDTO> loanRecommendInfoDTOS;
+    List<LoanRecommendInfoDTO> loanRecommendInfos;
 }

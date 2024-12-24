@@ -69,7 +69,7 @@ public class LoanService {
 
             for (Loan loan : availableLoans) {
                 LoanInfoDTO loanInfoDTO = loanMapper.loanToInfoDTO(loan);
-                loanInfoDTO.setDsr(String.format("%.2f", getNewDSR(property, loan)));
+                loanInfoDTO.setDsr(getNewDSR(property, loan));
                 if (loan.getProvider().equalsIgnoreCase("하나")) {
                     hanaLoans.add(loanInfoDTO);
                 } else if (loan.getProvider().equalsIgnoreCase("버팀목")) {
@@ -90,7 +90,7 @@ public class LoanService {
          * TODO GuestDTO 추가 필요
          */
         return LoanResponse.builder()
-                .loanRecommendInfoDTOS(loanRecommendInfoDTOS)
+                .loanRecommendInfos(loanRecommendInfoDTOS)
                 .build();
     }
 
@@ -99,14 +99,14 @@ public class LoanService {
         Property property = propertyRepository.findByUser_UserId(userId).orElseThrow();
         Loan loan = loanRepository.findById(loanId).orElseThrow();
         LoanDetailResponse loanDetailDTO = loanMapper.loanToDetailResponse(loan);
-        loanDetailDTO.setDsr(String.format("%.2f", getNewDSR(property, loan)));
+        loanDetailDTO.setDsr(getNewDSR(property, loan));
         return loanDetailDTO;
     }
 
     private Double getNewDSR(Property property, Loan loan) {
         int originalAnnualRepayment = property.getAnnualPrinciple() + property.getAnnualInterest();
         int newAnnualRepayment = getNewAnnualRepayment(loan);
-        return (double) (originalAnnualRepayment + newAnnualRepayment) / property.getIncome() * 100;
+        return (double) Math.round((float) (originalAnnualRepayment + newAnnualRepayment) / property.getIncome() * 10000) / 100;
     }
 
     private Integer getNewAnnualRepayment(Loan loan) {

@@ -44,31 +44,43 @@ public class Loan {
 
     private String provider;
 
-    private String rent_type;
+    @Column(name = "rent_type")
+    private String rentType;
 
     private Double rate;
 
+    @Column(name = "limit_amount")
     private Integer limitAmount;
 
     private Integer income;
 
+    @Column(name = "has_house")
     private Boolean hasHouse;
 
+    @Column(name = "job_type")
     private String jobType;
 
+    @Column(name = "max_age")
     private Integer maxAge;
 
+    @Column(name = "max_period")
     private Integer maxPeriod;
 
+    @Column(name = "max_price")
     private Integer maxPrice;
 
+    @Column(name = "min_deposit")
     private Integer minDeposit;
 
+    @Column(name = "max_deposit")
     private Integer maxDeposit;
 
+    @Column(name = "exclusive_area")
     private Double exclusiveArea;
 
+    @Column(name = "payback_method")
     private String paybackMethod;
 
+    @Column(name = "additional_condition")
     private String additionalCondition;
 }
