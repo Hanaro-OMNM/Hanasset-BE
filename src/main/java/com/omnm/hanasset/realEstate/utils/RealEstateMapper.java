@@ -1,14 +1,12 @@
 package com.omnm.hanasset.realEstate.utils;
 
-import com.omnm.hanasset.realEstate.dto.RealEstateBasicResponse;
-import com.omnm.hanasset.realEstate.dto.RealEstateDetailResponse;
-import com.omnm.hanasset.realEstate.dto.RealEstateDto;
-import com.omnm.hanasset.realEstate.dto.RealEstateTypeResponse;
+import com.omnm.hanasset.realEstate.dto.*;
 import com.omnm.hanasset.realEstate.entity.HousingComplex;
 import com.omnm.hanasset.realEstate.entity.HousingType;
 import com.omnm.hanasset.realEstate.entity.RealEstate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface RealEstateMapper {
@@ -36,4 +34,19 @@ public interface RealEstateMapper {
     @Mapping(source = "housingComplex.buildingCoverageRatio", target = "buildingRatioInfo.buildingCoverageRatio")
     @Mapping(source = "housingComplex.constructionCompany", target = "constructionCompany")
     RealEstateBasicResponse toRealEstateBasicResponse(HousingComplex housingComplex);
+
+    @Mapping(source = "housingType.housingComplex.code", target = "complexNumber")
+    @Mapping(source = "housingType.code", target = "pyeongTypeNumber")
+    @Mapping(source = "type", target = "tradeType", qualifiedByName = "mapTradeType")
+    RealEstateMarketPriceResponse toRealEstateMarketPriceResponse(RealEstate realEstate);
+
+    @Named("mapTradeType")
+    default String mapTradeType(String type) {
+        if ("전세".equals(type)) {
+            return "B1";
+        } else if ("월세".equals(type)) {
+            return "B2";
+        }
+        return type;
+    }
 }
