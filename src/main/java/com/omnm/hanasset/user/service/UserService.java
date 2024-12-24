@@ -69,7 +69,7 @@ public class UserService {
         String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request);
 
         if (StringUtils.hasText(accessToken) && StringUtils.hasText(refreshToken)) {
-            tokenProvider.destoryToken(accessToken, refreshToken);
+            tokenProvider.destroyToken(accessToken, refreshToken);
             return "로그아웃 성공";
         }
 

@@ -121,7 +121,7 @@ public class TokenProvider {
         return null;
     }
 
-    public void destoryToken(String accessToken, String refreshToken) {
+    public void destroyToken(String accessToken, String refreshToken) {
         Claims claims = parseClaims(accessToken);
         Long expiration = calculateRemainingTime(claims.getExpiration());
 
