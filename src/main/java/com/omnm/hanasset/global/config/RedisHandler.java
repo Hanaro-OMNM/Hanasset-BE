@@ -1,6 +1,7 @@
 package com.omnm.hanasset.global.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RedisHandler {
@@ -55,7 +57,7 @@ public class RedisHandler {
             operation.run();
             return 1;
         } catch (Exception e) {
-            System.out.println("Redis 작업 오류 발생 :: " + e.getMessage());
+            log.error("Redis 작업 오류 발생 :: " + e.getMessage());
             return 0;
         }
     }

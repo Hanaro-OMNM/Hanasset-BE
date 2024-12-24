@@ -19,14 +19,14 @@ public class EmailConfirmController {
     private final EmailConfirmService emailConfirmService;
 
     @PostMapping("/sendemail")
-    public ApiResponseEntity sendEmail(@RequestParam String email) {
+    public ApiResponseEntity<?> sendEmail(@RequestParam String email) {
         emailConfirmService.sendEmail(email);
 
         return ApiResponseEntity.ok("이메일 인증 보내기 성공", null);
     }
 
     @GetMapping("/receive_code")
-    public ApiResponseEntity receiveCode(
+    public ApiResponseEntity<?> receiveCode(
             @RequestParam("email") String email,
             @RequestParam("code") String code) {
 

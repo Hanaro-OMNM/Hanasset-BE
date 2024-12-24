@@ -28,7 +28,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ApiResponseEntity signup(
+    public ApiResponseEntity<?> signup(
             @RequestBody @Valid EmailSignUpRequest emailSignUpRequest, HttpServletResponse response) throws IOException {
 
         userService.signUp(emailSignUpRequest);
@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<UserResponse> signin(
+    public ResponseEntity<UserResponse<?>> signin(
         @RequestBody @Valid EmailSignInRequest emailSignInRequest, HttpServletResponse response
     ) {
         List<String> tokensList = userService.signIn(emailSignInRequest);
@@ -58,14 +58,14 @@ public class UserController {
     }
 
     @PostMapping("/birth")
-    public ApiResponseEntity birth(@RequestBody @Valid BirthRequest birthRequest) {
+    public ApiResponseEntity<?> birth(@RequestBody @Valid BirthRequest birthRequest) {
         userService.setBirthDate(birthRequest);
 
         return ApiResponseEntity.ok("생년월일 입력 성공", null);
     }
 
     @PostMapping("/logout")
-    public ApiResponseEntity logout(HttpServletRequest request, HttpServletResponse response) {
+    public ApiResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String logoutResult = userService.logout(request);
         Cookie refreshTokenCookie = new Cookie("refreshToken", null); // 값 설정 없이 null로 초기화
         refreshTokenCookie.setHttpOnly(true);

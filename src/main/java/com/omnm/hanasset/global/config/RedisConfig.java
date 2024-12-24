@@ -1,5 +1,6 @@
 package com.omnm.hanasset.global.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+@Slf4j
 @RequiredArgsConstructor
 @Configuration
 @EnableRedisRepositories  // Redis Repository 활성화
@@ -84,7 +86,7 @@ public class RedisConfig {
             operation.run();
             return 1;
         } catch (Exception e) {
-            System.out.println("Redis 작업 오류 발생 :: " + e.getMessage());
+            log.error("Redis 작업 오류 발생 :: " + e.getMessage());
             return 0;
         }
     }
