@@ -6,11 +6,13 @@ import com.omnm.hanasset.consultant.dto.ConsultantResponse;
 import com.omnm.hanasset.consultant.dto.ConsultantSignInRequest;
 import com.omnm.hanasset.consultant.service.ConsultantService;
 import com.omnm.hanasset.global.common.ApiResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,13 +21,15 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-@Slf4j
+@Tag(name = "상담사", description = "상담사 API 목록")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/consultant")
 public class ConsultantController {
     private final ConsultantService consultantService;
 
+    @Operation(summary = "상담사 로그인", description = "상담사 Id와 Password로 로그인한다.")
+    @ApiResponse(responseCode = "200", description = "상담사 로그인 성공")
     @PostMapping("/signin")
     public ResponseEntity<ConsultantResponse<?>> signin(
             @RequestBody @Valid ConsultantSignInRequest consultantSignInRequest, HttpServletResponse response) throws IOException {
@@ -47,6 +51,8 @@ public class ConsultantController {
         return ResponseEntity.ok().headers(headers).body(ConsultantResponse.builder().message("상담사 로그인 성공").build());
     }
 
+    @Operation(summary = "상담사 정보 조회", description = "상담사의 DB Id와 상담사의 이름을 조회한다.")
+    @ApiResponse(responseCode = "200", description = "상담사 정보 조회 성공")
     @GetMapping
     public ApiResponseEntity<ConsultantInfoResponse> getConsultantInfo (@AuthenticationPrincipal ConsultantDetailsDTO consultantDetailsDTO) {
         ConsultantInfoResponse consultantInfoResponse = consultantService.getConsultantInfo(consultantDetailsDTO.getUsername());
