@@ -42,6 +42,8 @@ public class SecurityConfig {
                                 .requestMatchers("/users/birth/**").permitAll()
                                 .requestMatchers("/users/logout/**").permitAll()
                                 .requestMatchers("/users/me/**").authenticated()
+                                .requestMatchers("/markers/**").permitAll()
+                                .requestMatchers("/real-estates/**").permitAll()
                                 .requestMatchers("/users/bookmarks/**").authenticated()
                                 .requestMatchers("/swagger", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/swagger-resources/**").permitAll()
