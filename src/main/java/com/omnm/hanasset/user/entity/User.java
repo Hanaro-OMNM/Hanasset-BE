@@ -41,6 +41,9 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+//    @OneToOne(mappedBy = "property")
+//    private Property property;
+
     @OneToMany(mappedBy = "user")
     private List<BookmarkRealEstate> bookmarkRealEstates;
 

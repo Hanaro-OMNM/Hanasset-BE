@@ -42,7 +42,7 @@ public class UserService {
 
     @Transactional
     public List<String> signIn(EmailSignInRequest emailSignInRequest) {
-        User user = userRepository.findByEmail(emailSignInRequest.getEmail()).orElseThrow(IllegalArgumentException::new);
+        User user = userRepository.findByEmail(emailSignInRequest.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         isPasswordMatches(emailSignInRequest.getPassword(), user.getPassword()); // 비밀번호 일치하는지 체크
 
@@ -59,7 +59,7 @@ public class UserService {
 
     @Transactional
     public void setBirthDate(BirthRequest birth) {
-        User user = userRepository.findByEmail(birth.getEmail()).orElseThrow(IllegalArgumentException::new);
+        User user = userRepository.findByEmail(birth.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         user.updateBirthDate(birth.getBirthDate());
     }
