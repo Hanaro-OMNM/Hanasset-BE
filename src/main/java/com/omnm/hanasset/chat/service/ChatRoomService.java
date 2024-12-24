@@ -279,37 +279,65 @@ public class ChatRoomService {
         // ChatRoomDTO로 변환 후 ChatroomResponse에 포함
         ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(updatedChatRoom);
         return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
+
+
+    }public ChatroomResponse updateActiveToCompleted(String chatroomId, String currentState, String newState) {
+        if (!"active".equals(currentState) || !"completed".equals(newState)) {
+            throw new IllegalArgumentException("Invalid state transition: " + currentState + " to " + newState);
+        }
+
+        int rowsUpdated = chatRoomRepository.updateStatusAndFinishedAt(chatroomId, currentState, newState);
+        if (rowsUpdated == 0) {
+            throw new RuntimeException("No ChatRoom found with ID: " + chatroomId + " and status: " + currentState);
+        }
+
+        // Fetch updated ChatRoom
+        ChatRoom updatedChatRoom = chatRoomRepository.findByChatroomId(chatroomId)
+                .orElseThrow(() -> new RuntimeException("Failed to fetch updated ChatroomId for userId: " + chatroomId));
+
+        log.info("ChatRoom [{}] status updated from 'active' to 'completed'. FinishedAt set to current time.", chatroomId);
+
+        // Convert to DTO and return response
+        ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(updatedChatRoom);
+        return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
     }
 
 
 
-    public String findRoomId(Long userId, String chatroomStatus) {
+
+    public ChatRoomDTO findRoom(Long userId, String chatroomStatus) {
         String redisKey = CHATROOM_KEY_PREFIX + userId + ":" + chatroomStatus;
 
-        // 1. Redis에서 Room ID 조회
+        // 1. Redis에서 ChatRoomDTO 조회
         try {
             Object cachedValue = redisStreamTemplate.opsForValue().get(redisKey);
             if (cachedValue != null) {
-                log.info("Room ID found in Redis: {}", cachedValue);
-                return cachedValue.toString();
+                log.info("Room details found in Redis: {}", cachedValue);
+                return objectMapper.readValue(cachedValue.toString(), ChatRoomDTO.class);
             }
         } catch (Exception e) {
-            log.error("Error while fetching Room ID from Redis: {}", e.getMessage());
+            log.error("Error while fetching Room details from Redis: {}", e.getMessage());
         }
 
         // 2. Redis에 없을 경우 DB 조회
-        String roomId = chatRoomRepository.findRoomIdByUserIdAndStatus(userId, chatroomStatus)
+        ChatRoom chatRoom = chatRoomRepository.findRoomIdByUserIdAndStatus(userId, chatroomStatus)
+                .map(roomId -> chatRoomRepository.findByChatroomId(roomId)
+                        .orElseThrow(() -> new RuntimeException("Chat room not found in DB: " + roomId)))
                 .orElseThrow(() -> new RuntimeException("No room found for userId: " + userId + " with status: " + chatroomStatus));
 
-        // 3. Redis에 저장
+        // 3. ChatRoomDTO 변환 및 Redis에 저장
+        ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(chatRoom);
         try {
-            redisStreamTemplate.opsForValue().set(redisKey, roomId);
-            log.info("Room ID saved to Redis: {}", redisKey);
+
+            String json = objectMapper.writeValueAsString(chatRoomDTO);
+            redisStreamTemplate.opsForValue().set(redisKey, json);
+            log.info("Room details saved to Redis: {}", redisKey);
+
         } catch (Exception e) {
-            log.error("Error while saving Room ID to Redis: {}", e.getMessage());
+            log.error("Error while saving Room details to Redis: {}", e.getMessage());
         }
 
-        return roomId;
+        return chatRoomDTO;
     }
 
     public ChatroomResponse getCompletedChatroomsByUserId(Long userId) {

@@ -34,6 +34,16 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
                                  @Param("currentState") String currentState,
                                  @Param("newState") String newState);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE ChatRoom c SET c.chatroomStatus = :newState, " +
+            "c.finishedAt = CURRENT_TIMESTAMP " +
+            "WHERE c.chatroomId = :chatroomId AND c.chatroomStatus = :currentState")
+    int updateStatusAndFinishedAt(
+            @Param("chatroomId") String chatroomId,
+            @Param("currentState") String currentState,
+            @Param("newState") String newState
+    );
 
     // 2. 업데이트된 채팅방 조회
     @Query("SELECT c FROM ChatRoom c WHERE c.chatroomId = :chatroomId AND c.chatroomStatus = :newState")
