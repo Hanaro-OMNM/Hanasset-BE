@@ -3,7 +3,6 @@ package com.omnm.hanasset.user.service;
 import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
-import com.omnm.hanasset.user.exception.EmailException;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

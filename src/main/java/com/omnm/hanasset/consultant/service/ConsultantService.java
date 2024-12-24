@@ -4,7 +4,6 @@ import com.omnm.hanasset.consultant.dto.ConsultantInfoResponse;
 import com.omnm.hanasset.consultant.dto.ConsultantSignInRequest;
 import com.omnm.hanasset.consultant.entity.Consultant;
 import com.omnm.hanasset.consultant.repository.ConsultantRepository;
-import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.global.config.security.TokenProvider;
 import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
