@@ -42,7 +42,7 @@ public class UserService {
 
     @Transactional
     public List<String> signIn(EmailSignInRequest emailSignInRequest) {
-        User user = userRepository.findByEmail(emailSignInRequest.getEmail()).orElseThrow(IllegalArgumentException::new);
+        User user = userRepository.findByEmail(emailSignInRequest.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         isPasswordMatches(emailSignInRequest.getPassword(), user.getPassword()); // 비밀번호 일치하는지 체크
 
@@ -59,7 +59,7 @@ public class UserService {
 
     @Transactional
     public void setBirthDate(BirthRequest birth) {
-        User user = userRepository.findByEmail(birth.getEmail()).orElseThrow(IllegalArgumentException::new);
+        User user = userRepository.findByEmail(birth.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         user.updateBirthDate(birth.getBirthDate());
     }
@@ -85,21 +85,20 @@ public class UserService {
 
     private void isEmailExists (String email) {
         if (userRepository.findByEmail(email).isPresent()) {
-//            throw new UserException(ErrorCode.EXISTS_EMAIL);
-            throw new IllegalArgumentException("이미 회원가입된 이메일입니다.");
+            throw new CustomException(ErrorCode.ALREADY_REGISTERED_EMAIL);
         }
     }
 
     private void isPasswordMatches (String rawPassword, String encodedPassword) {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
-            throw new IllegalArgumentException("비밀번호가 틀립니다.");
+            throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
         }
     }
 
     private void isEmailVerified (String email) {
         String confirmStatus = redisHandler.getValue(email);
         if (confirmStatus == null || !confirmStatus.equals("confirmed")) {
-            throw new EmailException("이메일 인증이 완료되지 않았습니다.");
+            throw new CustomException(ErrorCode.NOT_VERIFIED_EMAIL);
         }
     }
 }
