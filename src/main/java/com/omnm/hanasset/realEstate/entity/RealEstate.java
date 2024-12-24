@@ -1,9 +1,12 @@
 package com.omnm.hanasset.realEstate.entity;
 
+import com.omnm.hanasset.bookmark.entity.BookmarkRealEstate;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
+
+import java.util.List;
 
 @ToString
 @Getter
@@ -64,4 +67,7 @@ public class RealEstate {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "housing_type_id", nullable = false)
     private HousingType housingType;
+
+    @OneToMany(mappedBy = "realEstate")
+    private List<BookmarkRealEstate> bookmarkRealEstates;
 }
