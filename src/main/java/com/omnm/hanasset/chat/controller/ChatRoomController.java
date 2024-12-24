@@ -28,7 +28,7 @@ public class ChatRoomController {
     //54b7054f-5d6f-425d-81f1-d7d57d5be662
     private final ChatRoomService chatRoomService;
     private final ChatRoomRepository chatRoomRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisStreamTemplate;
 
     @Operation(summary = "모든 채팅방 조회", description = "전체 채팅방 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "채팅방 목록 조회 성공")
@@ -43,6 +43,7 @@ public class ChatRoomController {
     @PostMapping("/create")
     public ApiResponseEntity<ChatroomResponse> createChatroom(@RequestBody ChatRoomDTO request) {
         ChatroomResponse response = chatRoomService.createRoom(request.getUserId(),request.getConsultantId(),request.getChatroomTitle(), request.getReservedTime());
+
         return ApiResponseEntity.ok("채팅방 생성 성공", response);
     }
 
@@ -146,10 +147,10 @@ public class ChatRoomController {
     // Redis에 상태를 저장하는 유틸리티 메서드
     private boolean setChatRoomStatusInRedis(String chatroomId, String status) {
         final String key = "stream_" + chatroomId;
-        final ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        final ValueOperations<String, Object> valueOperations = redisStreamTemplate.opsForValue();
 
         valueOperations.set(key, status);
-        return redisTemplate.expire(key, 1, TimeUnit.HOURS);
+        return redisStreamTemplate.expire(key, 1, TimeUnit.HOURS);
     }
 
 

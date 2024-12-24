@@ -18,6 +18,7 @@ import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import com.omnm.hanasset.chat.dto.ChatRoomDTO;
@@ -42,7 +43,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final RedisStreamSubscriber redisStreamSubscriber; // Redis Stream 구독
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisStreamTemplate; // 수정된 RedisTemplate
     private final ObjectMapper objectMapper;
     private static final String CHATROOM_KEY_PREFIX = "chatroom:";
 
@@ -73,6 +74,7 @@ public class ChatRoomService {
 
         log.info("Saving ChatRoom Entity: {}", chatRoomEntity);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoomEntity);
+
         log.info("Saved ChatRoom Entity: {}", savedChatRoom);
 
         ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(savedChatRoom);
@@ -81,7 +83,7 @@ public class ChatRoomService {
 
         try {
             String json = objectMapper.writeValueAsString(chatRoomDTO);
-            redisTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
+            redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
             createConsumerGroup(streamKey, groupName);
             log.info("Chat room information published to stream '{}': {}", streamKey, json);
         } catch (Exception e) {
@@ -93,7 +95,7 @@ public class ChatRoomService {
             String redisKey = "consultant:" + consultantId + ":waiting_rooms";
             try {
                 String json = objectMapper.writeValueAsString(chatRoomDTO);
-                redisTemplate.opsForStream().add(redisKey, Collections.singletonMap("chatRoom", json));
+                redisStreamTemplate.opsForStream().add(redisKey, Collections.singletonMap("chatRoom", json));
             } catch (JsonProcessingException e) {
                 log.error("Error syncing new room to Redis: {}", e.getMessage());
             }
@@ -108,7 +110,7 @@ public class ChatRoomService {
 
         // 1. Redis에서 Stream 데이터 삭제
         try {
-            Boolean isDeleted = redisTemplate.delete(streamKey); // 키 삭제
+            Boolean isDeleted = redisStreamTemplate.delete(streamKey); // 키 삭제
             if (Boolean.TRUE.equals(isDeleted)) {
                 log.info("Redis Stream [{}] deleted successfully.", streamKey);
             } else {
@@ -140,8 +142,8 @@ public class ChatRoomService {
     // Consumer Group 생성 (이미 존재하면 무시)
     private void createConsumerGroup(String streamKey, String groupName) {
         try {
-            // RedisTemplate을 사용하여 Consumer Group 생성
-            redisTemplate.opsForStream().createGroup(streamKey, ReadOffset.latest(), groupName);
+            // redisStreamTemplate을 사용하여 Consumer Group 생성
+            redisStreamTemplate.opsForStream().createGroup(streamKey, ReadOffset.latest(), groupName);
             log.info("Consumer Group created: {}", groupName);
         } catch (Exception e) {
             log.warn("Consumer Group already exists: {}", groupName);
@@ -171,10 +173,10 @@ public class ChatRoomService {
             String json = objectMapper.writeValueAsString(chatRoomDTOS);
 
             // Add the message to the stream
-            redisTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
+            redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
 
             // Set expiration (12 hours = 43200 seconds)
-            redisTemplate.expire(streamKey, 12, TimeUnit.HOURS);
+            redisStreamTemplate.expire(streamKey, 12, TimeUnit.HOURS);
 
             log.info("Added waiting room to stream '{}': {}", streamKey, json);
         } catch (JsonProcessingException e) {
@@ -188,7 +190,7 @@ public class ChatRoomService {
         List<ChatRoomDTO> chatRooms = new ArrayList<>();
 
         try {
-            List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
+            List<MapRecord<String, Object, Object>> messages = redisStreamTemplate.opsForStream()
                     .read(StreamReadOptions.empty().block(Duration.ofMillis(500)),
                             StreamOffset.create(streamKey, ReadOffset.from("0")));
             if (messages != null && !messages.isEmpty()) {
@@ -222,7 +224,7 @@ public class ChatRoomService {
         for (ChatRoomDTO chatRoomDTO : chatRooms) {
             try {
                 String json = objectMapper.writeValueAsString(chatRoomDTO);
-                redisTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
+                redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
             } catch (Exception e) {
                 log.error("Error syncing waiting room to Redis: {}", e.getMessage());
             }
@@ -233,7 +235,7 @@ public class ChatRoomService {
         String streamKey = "consultant:" + consultantId + ":waiting_rooms";
         try {
             // Redis Stream에서 해당 chatroomId와 일치하는 메시지 삭제
-            List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
+            List<MapRecord<String, Object, Object>> messages = redisStreamTemplate.opsForStream()
                     .read(StreamReadOptions.empty(), StreamOffset.fromStart(streamKey));
 
             for (MapRecord<String, Object, Object> message : messages) {
@@ -244,7 +246,7 @@ public class ChatRoomService {
 
                     // chatroomId가 일치하는 메시지 삭제
                     if (chatRoomDTO.getChatroomId().equals(chatroomId)) {
-                        redisTemplate.opsForStream().delete(streamKey, message.getId());
+                        redisStreamTemplate.opsForStream().delete(streamKey, message.getId());
                         log.info("Removed room [{}] from Redis waiting rooms.", chatroomId);
                         break;
                     }
@@ -286,7 +288,7 @@ public class ChatRoomService {
 
         // 1. Redis에서 Room ID 조회
         try {
-            Object cachedValue = redisTemplate.opsForValue().get(redisKey);
+            Object cachedValue = redisStreamTemplate.opsForValue().get(redisKey);
             if (cachedValue != null) {
                 log.info("Room ID found in Redis: {}", cachedValue);
                 return cachedValue.toString();
@@ -301,7 +303,7 @@ public class ChatRoomService {
 
         // 3. Redis에 저장
         try {
-            redisTemplate.opsForValue().set(redisKey, roomId);
+            redisStreamTemplate.opsForValue().set(redisKey, roomId);
             log.info("Room ID saved to Redis: {}", redisKey);
         } catch (Exception e) {
             log.error("Error while saving Room ID to Redis: {}", e.getMessage());

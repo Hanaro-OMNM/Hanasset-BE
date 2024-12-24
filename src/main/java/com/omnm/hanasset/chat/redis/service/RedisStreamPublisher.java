@@ -12,11 +12,11 @@ import java.util.Collections;
 @Service
 public class RedisStreamPublisher {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisStreamTemplate;
     private final ObjectMapper objectMapper;
 
-    public RedisStreamPublisher(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
-        this.redisTemplate = redisTemplate;
+    public RedisStreamPublisher(RedisTemplate<String, Object> redisStreamTemplate, ObjectMapper objectMapper) {
+        this.redisStreamTemplate = redisStreamTemplate;
         this.objectMapper = objectMapper;
     }
 
@@ -28,7 +28,7 @@ public class RedisStreamPublisher {
             String json = objectMapper.writeValueAsString(message);
 
             // Redis Stream에 JSON 메시지 추가
-            redisTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatMessage", json));
+            redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatMessage", json));
 
             // 로그 기록
             log.info("Message published to stream '{}': {}", streamKey, json);

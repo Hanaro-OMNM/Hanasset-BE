@@ -17,11 +17,11 @@ import java.util.UUID;
 @Service
 public class RedisStreamSubscriber {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisStreamTemplate;
     private final ObjectMapper objectMapper;
 
-    public RedisStreamSubscriber(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
-        this.redisTemplate = redisTemplate;
+    public RedisStreamSubscriber(RedisTemplate<String, Object> redisStreamTemplate, ObjectMapper objectMapper) {
+        this.redisStreamTemplate = redisStreamTemplate;
         this.objectMapper = objectMapper;
     }
 
@@ -35,14 +35,14 @@ public class RedisStreamSubscriber {
         try {
             // 1. 컨슈머 그룹 생성 (이미 존재하면 예외를 무시)
             try {
-                redisTemplate.opsForStream().createGroup(streamKey, ReadOffset.latest(), groupName);
+                redisStreamTemplate.opsForStream().createGroup(streamKey, ReadOffset.latest(), groupName);
                 log.info("Consumer Group created: {}", groupName);
             } catch (Exception e) {
                 log.warn("Consumer Group already exists: {}", groupName);
             }
 
             // 2. Redis 스트림에서 메시지 읽기
-            List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
+            List<MapRecord<String, Object, Object>> messages = redisStreamTemplate.opsForStream()
                     .read(Consumer.from(groupName, consumerName),
                             StreamReadOptions.empty().block(Duration.ofSeconds(2)),
                             StreamOffset.create(streamKey, ReadOffset.lastConsumed()));
@@ -63,7 +63,7 @@ public class RedisStreamSubscriber {
                         }
 
                         // 메시지 처리 후 ACK
-                        redisTemplate.opsForStream().acknowledge(streamKey, groupName, message.getId());
+                        redisStreamTemplate.opsForStream().acknowledge(streamKey, groupName, message.getId());
                     } catch (Exception e) {
                         log.error("Error processing message from stream '{}': {}", streamKey, e.getMessage(), e);
                     }
@@ -89,7 +89,7 @@ public class RedisStreamSubscriber {
 
         try {
             // Redis Stream에서 모든 데이터를 읽음
-            List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
+            List<MapRecord<String, Object, Object>> messages = redisStreamTemplate.opsForStream()
                     .read(StreamReadOptions.empty(), StreamOffset.fromStart(streamKey));
 
             if (messages != null && !messages.isEmpty()) {
