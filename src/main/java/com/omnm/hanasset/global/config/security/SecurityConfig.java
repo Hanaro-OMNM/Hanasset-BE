@@ -44,7 +44,10 @@ public class SecurityConfig {
                                 .requestMatchers("/users/me/**").authenticated()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/ws-chat/**").permitAll()
-                                .requestMatchers("/swagger", "/swagger-ui.html").permitAll()
+                                .requestMatchers("/markers/**").permitAll()
+                                .requestMatchers("/real-estates/**").permitAll()
+                                .requestMatchers("/users/bookmarks/**").authenticated()
+               .requestMatchers("/swagger", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/swagger-resources/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                                 .requestMatchers("/error/**", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg").permitAll() // 임시

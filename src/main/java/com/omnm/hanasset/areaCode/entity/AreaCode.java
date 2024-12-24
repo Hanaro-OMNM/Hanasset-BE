@@ -1,6 +1,7 @@
 package com.omnm.hanasset.areaCode.entity;
 
 
+import com.omnm.hanasset.bookmark.entity.BookmarkArea;
 import com.omnm.hanasset.realEstate.entity.HousingComplex;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -55,5 +56,8 @@ public class AreaCode {
 
     @OneToMany(mappedBy = "areaCode")
     private List<HousingComplex> housingComplexes;
+
+    @OneToMany(mappedBy = "areaCode")
+    private List<BookmarkArea> bookmarkAreas;
 
 }
