@@ -1,10 +1,13 @@
 package com.omnm.hanasset.consultant.service;
 
+import com.omnm.hanasset.consultant.dto.ConsultantInfoResponse;
 import com.omnm.hanasset.consultant.dto.ConsultantSignInRequest;
 import com.omnm.hanasset.consultant.entity.Consultant;
 import com.omnm.hanasset.consultant.repository.ConsultantRepository;
 import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.global.config.security.TokenProvider;
+import com.omnm.hanasset.global.exception.CustomException;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,8 +39,8 @@ public class ConsultantService {
 
         List<String> tokensList = new ArrayList<>();
 
-        String accessToken = tokenProvider.generateAccessToken(consultantSignInRequest.getConsultantLoginId());
-        String refreshToken = tokenProvider.generateRefreshToken(consultantSignInRequest.getConsultantLoginId());
+        String accessToken = tokenProvider.generateAccessToken("CONSULTANT " + consultantSignInRequest.getConsultantLoginId());
+        String refreshToken = tokenProvider.generateRefreshToken("CONSULTANT " + consultantSignInRequest.getConsultantLoginId());
 
         tokensList.add(accessToken);
         tokensList.add(refreshToken);
@@ -45,4 +48,13 @@ public class ConsultantService {
         return tokensList;
     }
 
+    @Transactional
+    public ConsultantInfoResponse getConsultantInfo(String consultantLoginId) {
+        Consultant consultant = consultantRepository.findByconsultantLoginId(consultantLoginId).orElseThrow(() -> new CustomException(ErrorCode.CONSULTANT_NOT_FOUND));
+
+        return ConsultantInfoResponse.builder()
+                .consultantId(consultant.getConsultantId())
+                .name(consultant.getName())
+                .build();
+    }
 }
