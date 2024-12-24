@@ -3,8 +3,10 @@ package com.omnm.hanasset.chat.controller;
 import com.omnm.hanasset.chat.dto.ChatMessageResponse;
 import com.omnm.hanasset.chat.dto.ChatRoomDTO;
 import com.omnm.hanasset.chat.dto.ChatroomResponse;
+import com.omnm.hanasset.chat.entity.ChatRoom;
 import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.service.ChatRoomService;
+import com.omnm.hanasset.chat.utils.ChatMapper;
 import com.omnm.hanasset.global.common.ApiResponseEntity;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +27,14 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @RestController
 public class ChatRoomController {
-    //54b7054f-5d6f-425d-81f1-d7d57d5be662
     private final ChatRoomService chatRoomService;
     private final ChatRoomRepository chatRoomRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ChatMapper chatMapper;
 
     @Operation(summary = "모든 채팅방 조회", description = "전체 채팅방 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "채팅방 목록 조회 성공")
-    @GetMapping
+    @GetMapping("/list")
     public ApiResponseEntity<ChatroomResponse> getAllChatrooms() {
         ChatroomResponse response = chatRoomService.findAll();
         return ApiResponseEntity.ok("채팅방 목록 조회 성공", response);
@@ -70,14 +72,20 @@ public class ChatRoomController {
         }
     }
 
-    //http://localhost:8080/find-room?userId=123&chatroomStatus=completed
     @Operation(summary = "예약된 상담 조회", description = "특정 유저의 예약된 상담을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "예약 상담 조회 성공")
-    @GetMapping("/findId")
-    public ApiResponseEntity<Object> findRoomId(@RequestParam Long userId, @RequestParam String chatroomStatus) {
+    @GetMapping("/findRoom")
+    public ApiResponseEntity<Object> findRoomDetails(@RequestParam Long userId, @RequestParam String chatroomStatus) {
         try {
-            String roomId = chatRoomService.findRoomId(userId, chatroomStatus);
-            return ApiResponseEntity.ok("Room found successfully.", roomId);
+            // DB에서 직접 조회
+            ChatRoom chatRoom = chatRoomRepository.findRoomIdByUserIdAndStatus(userId, chatroomStatus)
+                    .map(roomId -> chatRoomRepository.findByChatroomId(roomId)
+                            .orElseThrow(() -> new RuntimeException("Chat room not found in DB: " + roomId)))
+                    .orElseThrow(() -> new RuntimeException("No room found for userId: " + userId + " with status: " + chatroomStatus));
+
+            ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(chatRoom);
+
+            return ApiResponseEntity.ok("Room found successfully.", chatRoomDTO);
         } catch (RuntimeException e) {
             return ApiResponseEntity.fail(ErrorCode.NOT_FOUND)
                     .withMessage("Room not found for userId: " + userId + " and status: " + chatroomStatus);
@@ -100,7 +108,7 @@ public class ChatRoomController {
             String chatroomId = request.get("chatroomId");
             String currentState = request.get("state");
 
-            // 상태 전환 로직
+            // Determine the next state
             String newState = determineNextState(currentState);
 
             if (newState == null) {
@@ -108,17 +116,13 @@ public class ChatRoomController {
                         .withMessage("Invalid state: " + currentState);
             }
 
-            if ("completed".equals(newState)) {
-                boolean isExpireSet = setChatRoomStatusInRedis(chatroomId, "completed");
-                if (!isExpireSet) {
-                    return ApiResponseEntity.fail(ErrorCode.INTERNAL_SERVER_ERROR)
-                            .withMessage("Redis expiration 설정 실패");
-
-                }
+            // Call appropriate service method based on state transition
+            ChatroomResponse response;
+            if ("active".equals(currentState) && "completed".equals(newState)) {
+                response = chatRoomService.updateActiveToCompleted(chatroomId, currentState, newState);
+            } else {
+                response = chatRoomService.updateChatRoomStatus(chatroomId, currentState, newState);
             }
-
-            // 서비스 호출로 상태 업데이트
-            ChatroomResponse response = chatRoomService.updateChatRoomStatus(chatroomId, currentState, newState);
 
             return ApiResponseEntity.ok("채팅방 상태 업데이트 성공", response);
 
@@ -130,6 +134,7 @@ public class ChatRoomController {
                     .withMessage("Unexpected error: " + e.getMessage());
         }
     }
+
 
 
 
