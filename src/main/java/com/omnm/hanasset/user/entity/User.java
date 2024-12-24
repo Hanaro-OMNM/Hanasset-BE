@@ -1,5 +1,7 @@
 package com.omnm.hanasset.user.entity;
 
+import com.omnm.hanasset.bookmark.entity.BookmarkArea;
+import com.omnm.hanasset.bookmark.entity.BookmarkRealEstate;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -7,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Builder
@@ -37,6 +40,12 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user")
+    private List<BookmarkRealEstate> bookmarkRealEstates;
+
+    @OneToMany(mappedBy = "user")
+    private List<BookmarkArea> bookmarkAreas;
 
     public void updateBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
