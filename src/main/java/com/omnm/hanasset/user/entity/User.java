@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Entity(name = "USER")
+@Entity(name = "user")
 public class User {
     @Id
     @Column(name = "user_id", nullable = false)
