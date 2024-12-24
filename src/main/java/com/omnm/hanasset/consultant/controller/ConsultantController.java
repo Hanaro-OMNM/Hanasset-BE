@@ -1,8 +1,11 @@
 package com.omnm.hanasset.consultant.controller;
 
+import com.omnm.hanasset.global.dto.ConsultantDetailsDTO;
+import com.omnm.hanasset.consultant.dto.ConsultantInfoResponse;
 import com.omnm.hanasset.consultant.dto.ConsultantResponse;
 import com.omnm.hanasset.consultant.dto.ConsultantSignInRequest;
 import com.omnm.hanasset.consultant.service.ConsultantService;
+import com.omnm.hanasset.global.common.ApiResponseEntity;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -10,10 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,5 +45,12 @@ public class ConsultantController {
         response.addCookie(refreshCookie);
 
         return ResponseEntity.ok().headers(headers).body(ConsultantResponse.builder().message("상담사 로그인 성공").build());
+    }
+
+    @GetMapping
+    public ApiResponseEntity<ConsultantInfoResponse> getConsultantInfo (@AuthenticationPrincipal ConsultantDetailsDTO consultantDetailsDTO) {
+        ConsultantInfoResponse consultantInfoResponse = consultantService.getConsultantInfo(consultantDetailsDTO.getUsername());
+
+        return ApiResponseEntity.ok("상담사 정보 조회 성공", consultantInfoResponse);
     }
 }
