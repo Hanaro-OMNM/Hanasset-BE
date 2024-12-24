@@ -6,7 +6,6 @@ import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.user.dto.*;
 import com.omnm.hanasset.user.entity.User;
-import com.omnm.hanasset.user.exception.EmailException;
 import com.omnm.hanasset.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
