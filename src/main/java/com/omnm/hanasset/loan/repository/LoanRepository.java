@@ -9,20 +9,21 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface LoanRepository extends JpaRepository<Loan, Long> {
-    @Query(value = "SELECT * " +
-            "FROM LOAN " +
-            "WHERE LOAN.max_age >= TIMESTAMPDIFF(YEAR, NOW(), :birthdate) " +
-            "AND LOAN.income >= :income " +
-            "AND NOT (NOT LOAN.has_house AND :hasHouse) " +
-            "AND ((LOAN.job_type = '') OR (LOAN.job_type = :jobType)) " +
-            "AND ((LOAN.additional_condition = '') " +
-            "OR ((LOAN.additional_condition = 'abnormalHouse' AND :isAbnormalHouse) " +
-            "OR (LOAN.additional_condition = 'housingFraud' AND :isHousingFraud))) " +
-            "AND LOAN.exclusive_area >= :exclusiveArea " +
-            "AND LOAN.rent_type = :rentType " +
-            "AND :deposit BETWEEN LOAN.min_deposit + 1 AND LOAN.max_deposit " +
-            "AND ((LOAN.rent_type = '전세') OR (LOAN.rent_type = '월세' AND LOAN.max_price >= :price)) " +
-            "ORDER BY LOAN.rate, LOAN.limit_amount DESC", nativeQuery = true)
+    @Query(value = """
+            SELECT * FROM LOAN
+            WHERE LOAN.max_age >= TIMESTAMPDIFF(YEAR, NOW(), :birthdate)
+            AND LOAN.income >= :income
+            AND NOT (NOT LOAN.has_house AND :hasHouse)
+            AND ((LOAN.job_type = '') OR (LOAN.job_type = :jobType))
+            AND ((LOAN.additional_condition = '')
+            OR ((LOAN.additional_condition = 'abnormalHouse' AND :isAbnormalHouse)
+            OR (LOAN.additional_condition = 'housingFraud' AND :isHousingFraud)))
+            AND LOAN.exclusive_area >= :exclusiveArea
+            AND LOAN.rent_type = :rentType
+            AND :deposit BETWEEN LOAN.min_deposit + 1 AND LOAN.max_deposit
+            AND ((LOAN.rent_type = '전세') OR (LOAN.rent_type = '월세' AND LOAN.max_price >= :price))
+            ORDER BY LOAN.rate, LOAN.limit_amount DESC
+            """, nativeQuery = true)
     List<Loan> findAvailableLoans(@Param("birthdate") LocalDate birthdate,
                                   @Param("income") Integer income,
                                   @Param("hasHouse") Boolean hasHouse,
