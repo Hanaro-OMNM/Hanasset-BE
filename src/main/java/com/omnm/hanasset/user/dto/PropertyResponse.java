@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
-public class UserPropertyResponse {
+public class PropertyResponse {
     private String jobType;
     private Integer income;
     private Integer capital;
