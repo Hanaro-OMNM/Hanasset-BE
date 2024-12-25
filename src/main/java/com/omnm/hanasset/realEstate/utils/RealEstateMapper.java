@@ -40,6 +40,10 @@ public interface RealEstateMapper {
     @Mapping(source = "type", target = "tradeType", qualifiedByName = "mapTradeType")
     RealEstateMarketPriceResponse toRealEstateMarketPriceResponse(RealEstate realEstate);
 
+    @Mapping(source = "housingType.housingComplex.address", target = "address")
+    @Mapping(source = "housingType.exclusiveAreaSize", target = "exclusiveAreaSize")
+    RealEstateInfoResponse toRealEstateInfoResponse(RealEstate realEstate);
+
     @Named("mapTradeType")
     default String mapTradeType(String type) {
         if ("전세".equals(type)) {
