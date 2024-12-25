@@ -1,10 +1,12 @@
 package com.omnm.hanasset.user.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Schema(description = "손님 자산 정보 불러오기 응답")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

@@ -1,5 +1,6 @@
 package com.omnm.hanasset.user.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -7,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
+@Schema(description = "생년월일 입력 요청")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
