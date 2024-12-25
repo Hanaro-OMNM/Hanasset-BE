@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
@@ -45,6 +44,8 @@ public class SecurityConfig {
                                 .requestMatchers("/markers/**").permitAll()
                                 .requestMatchers("/real-estates/**").permitAll()
                                 .requestMatchers("/users/bookmarks/**").authenticated()
+                                .requestMatchers("/consultant/signin/**").permitAll()
+                                .requestMatchers("/consultant/**").authenticated()
                                 .requestMatchers("/swagger", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/swagger-resources/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
@@ -53,4 +54,5 @@ public class SecurityConfig {
                 );
         return http.build();
     }
+
 }
