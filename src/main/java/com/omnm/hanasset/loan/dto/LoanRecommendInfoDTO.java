@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class LoanRecommendInfoDTO {
     @Schema(description = "매물 데이터 정보")
-    RealEstateInfoResponse realEstateInfoResponse;
+    RealEstateInfoResponse realEstateInfo;
     @Schema(description = "하나은행 대출 상품 추천 목록")
     List<LoanInfoDTO> hanaLoans;
     @Schema(description = "버팀목 대출 상품 추천 목록")

@@ -93,7 +93,7 @@ public class LoanService {
             }
 
             loanRecommendInfoDTOS.add(LoanRecommendInfoDTO.builder()
-                    .realEstateInfoResponse(realEstateMapper.toRealEstateInfoResponse(realEstate))
+                    .realEstateInfo(realEstateMapper.toRealEstateInfoResponse(realEstate))
                     .hanaLoans(hanaLoans)
                     .beotimmokLoans(beotimmokLoans)
                     .build());
