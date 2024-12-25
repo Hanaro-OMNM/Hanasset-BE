@@ -18,5 +18,5 @@ public class UserPropertyResponse {
     private Integer annualPrincipal;
     private Boolean isAbnormalHouse;
     private Boolean isHousingFraudVictim;
-    private Double dsr;
+    private Double stressDsr;
 }

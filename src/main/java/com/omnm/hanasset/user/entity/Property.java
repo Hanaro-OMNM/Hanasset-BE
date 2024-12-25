@@ -15,7 +15,7 @@ public class Property {
     private Long propertyId;
 
     @OneToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id", nullable = false) // FK가 되는 USER 테이블의 PK
     private User user;
 
     @Column(name = "job_type")

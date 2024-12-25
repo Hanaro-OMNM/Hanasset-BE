@@ -5,8 +5,10 @@ import com.omnm.hanasset.global.config.security.TokenProvider;
 import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.user.dto.*;
+import com.omnm.hanasset.user.entity.Property;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.exception.EmailException;
+import com.omnm.hanasset.user.repository.PropertyRepository;
 import com.omnm.hanasset.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PropertyRepository propertyRepository;
     private final PasswordEncoder passwordEncoder; // 반드시 final로 선언; 인증과 인가에서 사용될 패스워드의 인코딩 방식을 지정; PasswordConfig 파일 확인
     private final TokenProvider tokenProvider; // 반드시 final로 선언; JWT 발급
     private final RedisHandler redisHandler;
@@ -33,11 +36,25 @@ public class UserService {
         isEmailExists(emailSignUpRequest.getEmail()); // 이미 존재하는 이메일인지 확인
         isEmailVerified(emailSignUpRequest.getEmail()); // 메일 인증이 완료된 이메일인지 확인
 
-        userRepository.save(User.builder()
+        User user = userRepository.save(User.builder()
                 .email(emailSignUpRequest.getEmail())
                 .password(passwordEncoder.encode(emailSignUpRequest.getPassword()))
                 .name(emailSignUpRequest.getName())
                 .build());
+
+        propertyRepository.save(
+                Property.builder()
+                            .user(user)
+                            .income(0)
+                            .capital(0)
+                            .hasHouse(false)
+                            .annualInterest(0)
+                            .annualPrinciple(0)
+                            .isAbnormalHouse(false)
+                            .isHousingFraudVictim(false)
+                            .stressDsr(0.0)
+                        .build()
+        );
     }
 
     @Transactional

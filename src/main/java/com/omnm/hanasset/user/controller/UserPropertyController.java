@@ -16,16 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserPropertyController {
     private final UserPropertyService userPropertyService;
 
-    @GetMapping("/assets")
+    @GetMapping("/property")
     public ApiResponseEntity<UserPropertyResponse> getUserPropertyInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
         Long userId = userDetailsDTO.getId();
+
         UserPropertyResponse userPropertyInfo = userPropertyService.getUserPropertyInfo(userId);
 
         return ApiResponseEntity.ok("회원 자산 불러오기 성공", userPropertyInfo);
     }
 
-    @GetMapping("/test")
-    public ApiResponseEntity<?> setTest() {
-        return ApiResponseEntity.ok("테스트", null);
-    }
 }

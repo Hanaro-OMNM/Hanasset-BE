@@ -17,7 +17,11 @@ public enum ErrorCode {
     LOGOUT_TOKEN(HttpStatus.UNAUTHORIZED, "로그아웃된 토큰입니다."),
 
     // RealEstate ErrorCode
-    REAL_ESTATE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 부동산이 존재하지 않습니다.");
+    REAL_ESTATE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 부동산이 존재하지 않습니다."),
+
+
+    // Property ErrorCode
+    PROPERTY_NOT_FOUND(HttpStatus.NOT_FOUND, "자산 정보가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
