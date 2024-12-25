@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface BookmarkRealEstateRepository extends JpaRepository<BookmarkRealEstate, Long> {
     List<BookmarkRealEstate> findByUser_UserId(Long userId);
+    void deleteByUser_UserIdAndRealEstate_RealEstateId(Long userId, Long realEstateId);
 }
