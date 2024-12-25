@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface LoanRepository extends JpaRepository<Loan, Long> {
@@ -23,7 +23,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
             "AND :deposit BETWEEN LOAN.min_deposit + 1 AND LOAN.max_deposit " +
             "AND ((LOAN.rent_type = '전세') OR (LOAN.rent_type = '월세' AND LOAN.max_price >= :price)) " +
             "ORDER BY LOAN.rate, LOAN.limit_amount DESC", nativeQuery = true)
-    List<Loan> findAvailableLoans(@Param("birthdate") LocalDateTime birthdate,
+    List<Loan> findAvailableLoans(@Param("birthdate") LocalDate birthdate,
                                   @Param("income") Integer income,
                                   @Param("hasHouse") Boolean hasHouse,
                                   @Param("jobType") String jobType,
