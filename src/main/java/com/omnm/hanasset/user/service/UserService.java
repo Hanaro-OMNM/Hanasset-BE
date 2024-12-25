@@ -7,7 +7,6 @@ import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.user.dto.*;
 import com.omnm.hanasset.user.entity.Property;
 import com.omnm.hanasset.user.entity.User;
-import com.omnm.hanasset.user.exception.EmailException;
 import com.omnm.hanasset.user.repository.PropertyRepository;
 import com.omnm.hanasset.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -102,21 +101,20 @@ public class UserService {
 
     private void isEmailExists (String email) {
         if (userRepository.findByEmail(email).isPresent()) {
-//            throw new UserException(ErrorCode.EXISTS_EMAIL);
-            throw new IllegalArgumentException("이미 회원가입된 이메일입니다.");
+            throw new CustomException(ErrorCode.ALREADY_REGISTERED_EMAIL);
         }
     }
 
     private void isPasswordMatches (String rawPassword, String encodedPassword) {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
-            throw new IllegalArgumentException("비밀번호가 틀립니다.");
+            throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
         }
     }
 
     private void isEmailVerified (String email) {
         String confirmStatus = redisHandler.getValue(email);
         if (confirmStatus == null || !confirmStatus.equals("confirmed")) {
-            throw new EmailException("이메일 인증이 완료되지 않았습니다.");
+            throw new CustomException(ErrorCode.NOT_VERIFIED_EMAIL);
         }
     }
 }
