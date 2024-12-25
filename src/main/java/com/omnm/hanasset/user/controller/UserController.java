@@ -104,7 +104,7 @@ public class UserController {
     @Operation(summary = "회원 정보 수정하기", description = "유저의 이름 및 비밀번호 수정을 시도한다.")
     @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공")
     @PutMapping("/me")
-    public ApiResponseEntity<?> updateUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestBody UserInfoRequest userInfoRequest) {
+    public ApiResponseEntity<?> updateUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestBody @Valid UserInfoRequest userInfoRequest) {
         Long userId = userDetailsDTO.getId();
         userService.updateUserInfo(userId, userInfoRequest);
 
