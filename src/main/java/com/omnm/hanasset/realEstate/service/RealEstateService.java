@@ -54,4 +54,15 @@ public class RealEstateService {
                 .orElseThrow(() -> new CustomException(ErrorCode.REAL_ESTATE_NOT_FOUND));
         return realEstateMapper.toRealEstateDetailResponse(realEstate);
     }
+
+    public RealEstatesResponse getRecentVisitedRealEstates(List<Long> realEstateIds) {
+        List<RealEstate> realEstates = realEstateRepository.findByRealEstateIdIn(realEstateIds);
+        List<RealEstateDto> realEstateDtoList = realEstates.stream()
+                .map(realEstateMapper::toRealEstateDto)
+                .collect(Collectors.toList());
+        return RealEstatesResponse.builder()
+                .count(realEstateDtoList.size())
+                .realEstates(realEstateDtoList)
+                .build();
+    }
 }
