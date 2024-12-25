@@ -20,6 +20,7 @@ import com.omnm.hanasset.user.repository.PropertyRepository;
 import com.omnm.hanasset.user.repository.UserRepository;
 import com.omnm.hanasset.user.utils.PropertyMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class LoanService {
     public LoanResponse getRecommendLoans(Long userId, List<Long> realEstateIds) {
         // Exception 임시 처리
         User user = userRepository.findById(userId).orElseThrow();
-        Property property = propertyRepository.findByUser_UserId(userId).orElseThrow();
+        Optional<Property> userProperty = propertyRepository.findByUser_UserId(userId);
         List<RealEstate> realEstates = realEstateRepository.findAllById(realEstateIds);
 
         /**
@@ -63,21 +65,27 @@ public class LoanService {
             List<LoanInfoDTO> beotimmokLoans = new ArrayList<>();
 
             HousingType housingType = housingTypeRepository.findById(realEstate.getHousingType().getHousingTypeId()).orElseThrow();
-            List<Loan> availableLoans = loanRepository.findAvailableLoans(
-                    user.getBirthDate(),
-                    property.getIncome(),
-                    property.getHasHouse(),
-                    property.getJobType(),
-                    property.getIsAbnormalHouse(),
-                    property.getIsHousingFraudVictim(),
-                    housingType.getExclusiveAreaSize().intValue(),
-                    realEstate.getType(),
-                    (int) (realEstate.getDeposit() / 10000),
-                    (int) (realEstate.getPrice() / 10000));
+            List<Loan> availableLoans;
+            if (userProperty.isPresent()) {
+                availableLoans = loanRepository.findAvailableLoans(
+                        user.getBirthDate(),
+                        userProperty.get().getIncome(),
+                        userProperty.get().getHasHouse(),
+                        userProperty.get().getJobType(),
+                        userProperty.get().getIsAbnormalHouse(),
+                        userProperty.get().getIsHousingFraudVictim(),
+                        housingType.getExclusiveAreaSize().intValue(),
+                        realEstate.getType(),
+                        (int) (realEstate.getDeposit() / 10000),
+                        (int) (realEstate.getPrice() / 10000));
+            }
+            else {
+                availableLoans = loanRepository.findAll();
+            }
 
             for (Loan loan : availableLoans) {
                 LoanInfoDTO loanInfoDTO = loanMapper.loanToInfoDTO(loan);
-                loanInfoDTO.setDsr(getNewDSR(property, loan));
+                loanInfoDTO.setDsr(getNewDSR(userProperty, loan));
                 if (loan.getProvider().equalsIgnoreCase("하나")) {
                     hanaLoans.add(loanInfoDTO);
                 } else if (loan.getProvider().equalsIgnoreCase("버팀목")) {
@@ -93,9 +101,25 @@ public class LoanService {
                     .build());
         }
 
+        UserPropertyResponse userPropertyResponse;
+        if (userProperty.isPresent()) {
+            userPropertyResponse = propertyMapper.propertyToUserPropertyResponse(userProperty.get());
+            userPropertyResponse.setAge(calculateAge(user.getBirthDate()));
+        }
+        else {
+            userPropertyResponse = UserPropertyResponse.builder()
+                    .name(user.getName())
+                    .age(calculateAge(user.getBirthDate()))
+                    .jobType("")
+                    .income(0)
+                    .capital(0)
+                    .hasHouse(false)
+                    .annualInterest(0)
+                    .annualPrinciple(0)
+                    .dsr(0.0)
+                    .build();
+        }
 
-        UserPropertyResponse userPropertyResponse = propertyMapper.propertyToUserPropertyResponse(property);
-        userPropertyResponse.setAge(calculateAge(user.getBirthDate()));
         return LoanResponse.builder()
                 .user(userPropertyResponse)
                 .loanRecommendInfos(loanRecommendInfoDTOS)
@@ -104,17 +128,24 @@ public class LoanService {
 
     public LoanDetailResponse getLoan(Long userId, Long loanId) {
         // Exception 임시 처리
-        Property property = propertyRepository.findByUser_UserId(userId).orElseThrow();
+        Optional<Property> property = propertyRepository.findByUser_UserId(userId);
         Loan loan = loanRepository.findById(loanId).orElseThrow();
         LoanDetailResponse loanDetailDTO = loanMapper.loanToDetailResponse(loan);
         loanDetailDTO.setDsr(getNewDSR(property, loan));
         return loanDetailDTO;
     }
 
-    private Double getNewDSR(Property property, Loan loan) {
-        int originalAnnualRepayment = property.getAnnualPrinciple() + property.getAnnualInterest();
+    private Double getNewDSR(Optional<Property> property, Loan loan) {
+        int originalAnnualRepayment = 0;
+        if (property.isPresent()) {
+            originalAnnualRepayment = property.get().getAnnualPrinciple() + property.get().getAnnualInterest();
+        }
         int newAnnualRepayment = getNewAnnualRepayment(loan);
-        return (double) Math.round((float) (originalAnnualRepayment + newAnnualRepayment) / Math.max(1, property.getIncome()) * 10000) / 100;
+        int period = 1;
+        if (property.isPresent()) {
+            period = Math.max(1, property.get().getIncome());
+        }
+        return (double) Math.round((float) (originalAnnualRepayment + newAnnualRepayment) / period * 10000) / 100;
     }
 
     private Integer getNewAnnualRepayment(Loan loan) {
