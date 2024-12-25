@@ -88,4 +88,12 @@ public class UserController {
 
         return ApiResponseEntity.ok("회원 정보 조회 성공", userInfo);
     }
+
+    @PutMapping("/me")
+    public ApiResponseEntity<?> updateUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestBody UserInfoRequest userInfoRequest) {
+        Long userId = userDetailsDTO.getId();
+        userService.updateUserInfo(userId, userInfoRequest);
+
+        return ApiResponseEntity.ok("회원 정보 수정 성공", null);
+    }
 }

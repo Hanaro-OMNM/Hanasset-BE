@@ -99,6 +99,17 @@ public class UserService {
         return UserInfoResponse.builder().name(user.getName()).email(user.getEmail()).birthDate(user.getBirthDate()).build();
     }
 
+    @Transactional
+    public void updateUserInfo(Long userId, UserInfoRequest userInfoRequest) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        user.updateName(userInfoRequest.getName()); // 유저 이름 수정
+
+        isPasswordMatches(userInfoRequest.getCurrPassword(), user.getPassword()); // 기존 비밀번호와 일치하는 지 체크
+
+        user.updatePassword(passwordEncoder.encode(userInfoRequest.getNewPassword())); // 비밀번호 업데이트
+    }
+
     private void isEmailExists (String email) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new CustomException(ErrorCode.ALREADY_REGISTERED_EMAIL);
