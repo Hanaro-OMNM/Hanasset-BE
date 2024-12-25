@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RealEstatesInfoResponse {
+public class RealEstateInfoResponse {
     @Schema(description = "매물 ID")
     private Long realEstateId;
 
