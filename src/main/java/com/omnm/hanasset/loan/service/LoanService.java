@@ -13,14 +13,18 @@ import com.omnm.hanasset.realEstate.entity.RealEstate;
 import com.omnm.hanasset.realEstate.repository.HousingTypeRepository;
 import com.omnm.hanasset.realEstate.repository.RealEstateRepository;
 import com.omnm.hanasset.realEstate.utils.RealEstateMapper;
+import com.omnm.hanasset.user.dto.UserPropertyResponse;
 import com.omnm.hanasset.user.entity.Property;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.repository.PropertyRepository;
 import com.omnm.hanasset.user.repository.UserRepository;
+import com.omnm.hanasset.user.utils.PropertyMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +35,7 @@ public class LoanService {
 
     private final LoanMapper loanMapper;
     private final RealEstateMapper realEstateMapper;
+    private final PropertyMapper propertyMapper;
     private final UserRepository userRepository;
     private final LoanRepository loanRepository;
     private final PropertyRepository propertyRepository;
@@ -80,20 +85,19 @@ public class LoanService {
                 }
             }
 
-            /**
-             * TODO RealEstateDTO 추가 필요
-             */
 
             loanRecommendInfoDTOS.add(LoanRecommendInfoDTO.builder()
+                    .realEstateInfoResponse(realEstateMapper.toRealEstateInfoResponse(realEstate))
                     .hanaLoans(hanaLoans)
                     .beotimmokLoans(beotimmokLoans)
                     .build());
         }
 
-        /**
-         * TODO GuestDTO 추가 필요
-         */
+
+        UserPropertyResponse userPropertyResponse = propertyMapper.propertyToUserPropertyResponse(property);
+        userPropertyResponse.setAge(calculateAge(user.getBirthDate()));
         return LoanResponse.builder()
+                .user(userPropertyResponse)
                 .loanRecommendInfos(loanRecommendInfoDTOS)
                 .build();
     }
@@ -138,5 +142,12 @@ public class LoanService {
         Double rate = loan.getRate() / 100;
         Double totalInterest = loan.getLimitAmount() * rate / 12 * loan.getMaxPeriod();
         return (int) (loan.getLimitAmount() + totalInterest) / Math.max(1, loan.getMaxPeriod());
+    }
+
+    public int calculateAge(LocalDate birthDate) {
+        if ((birthDate != null)) {
+            return Period.between(birthDate, LocalDate.now()).getYears();
+        }
+        return 0;
     }
 }
