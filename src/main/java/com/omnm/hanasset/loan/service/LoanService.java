@@ -7,10 +7,12 @@ import com.omnm.hanasset.loan.dto.LoanResponse;
 import com.omnm.hanasset.loan.entity.Loan;
 import com.omnm.hanasset.loan.repository.LoanRepository;
 import com.omnm.hanasset.loan.utils.LoanMapper;
+import com.omnm.hanasset.realEstate.dto.RealEstateInfoResponse;
 import com.omnm.hanasset.realEstate.entity.HousingType;
 import com.omnm.hanasset.realEstate.entity.RealEstate;
 import com.omnm.hanasset.realEstate.repository.HousingTypeRepository;
 import com.omnm.hanasset.realEstate.repository.RealEstateRepository;
+import com.omnm.hanasset.realEstate.utils.RealEstateMapper;
 import com.omnm.hanasset.user.entity.Property;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.repository.PropertyRepository;
@@ -28,6 +30,7 @@ import java.util.List;
 public class LoanService {
 
     private final LoanMapper loanMapper;
+    private final RealEstateMapper realEstateMapper;
     private final UserRepository userRepository;
     private final LoanRepository loanRepository;
     private final PropertyRepository propertyRepository;
@@ -80,6 +83,7 @@ public class LoanService {
             /**
              * TODO RealEstateDTO 추가 필요
              */
+
             loanRecommendInfoDTOS.add(LoanRecommendInfoDTO.builder()
                     .hanaLoans(hanaLoans)
                     .beotimmokLoans(beotimmokLoans)
@@ -106,7 +110,7 @@ public class LoanService {
     private Double getNewDSR(Property property, Loan loan) {
         int originalAnnualRepayment = property.getAnnualPrinciple() + property.getAnnualInterest();
         int newAnnualRepayment = getNewAnnualRepayment(loan);
-        return (double) Math.round((float) (originalAnnualRepayment + newAnnualRepayment) / property.getIncome() * 10000) / 100;
+        return (double) Math.round((float) (originalAnnualRepayment + newAnnualRepayment) / Math.max(1, property.getIncome()) * 10000) / 100;
     }
 
     private Integer getNewAnnualRepayment(Loan loan) {
@@ -120,19 +124,19 @@ public class LoanService {
     private Integer getEqualPrinciplePaymentAnnualRepayment(Loan loan) {
         double totalInterest = 0;
         Double amount = Double.valueOf(loan.getLimitAmount());
-        double principle = (double) loan.getLimitAmount() / loan.getMaxPeriod();
+        double principle = (double) loan.getLimitAmount() / Math.max(1, loan.getMaxPeriod());
         double rate = loan.getRate() / 100;
         for (int i = 0; i < loan.getMaxPeriod(); i++) {
             double interest = Math.max(0, amount) / loan.getMaxPeriod() * rate;
             totalInterest += interest;
             amount -= principle;
         }
-        return (int) (loan.getLimitAmount() + totalInterest) / loan.getMaxPeriod();
+        return (int) (loan.getLimitAmount() + totalInterest) / Math.max(1, loan.getMaxPeriod());
     }
 
     private Integer getBalloonPaymentAnnualRepayment(Loan loan) {
         Double rate = loan.getRate() / 100;
         Double totalInterest = loan.getLimitAmount() * rate / 12 * loan.getMaxPeriod();
-        return (int) (loan.getLimitAmount() + totalInterest) / loan.getMaxPeriod();
+        return (int) (loan.getLimitAmount() + totalInterest) / Math.max(1, loan.getMaxPeriod());
     }
 }
