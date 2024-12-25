@@ -7,7 +7,6 @@ import com.omnm.hanasset.loan.dto.LoanResponse;
 import com.omnm.hanasset.loan.entity.Loan;
 import com.omnm.hanasset.loan.repository.LoanRepository;
 import com.omnm.hanasset.loan.utils.LoanMapper;
-import com.omnm.hanasset.realEstate.dto.RealEstateInfoResponse;
 import com.omnm.hanasset.realEstate.entity.HousingType;
 import com.omnm.hanasset.realEstate.entity.RealEstate;
 import com.omnm.hanasset.realEstate.repository.HousingTypeRepository;
@@ -20,7 +19,6 @@ import com.omnm.hanasset.user.repository.PropertyRepository;
 import com.omnm.hanasset.user.repository.UserRepository;
 import com.omnm.hanasset.user.utils.PropertyMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
