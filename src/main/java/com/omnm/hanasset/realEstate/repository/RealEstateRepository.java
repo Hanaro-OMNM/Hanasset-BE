@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface RealEstateRepository extends JpaRepository<RealEstate, Long> {
     List<RealEstate> findByHousingType_HousingComplex_HousingComplexId(Long housingComplexId);
+    List<RealEstate> findByRealEstateIdIn(List<Long> realEstateIds);
 }

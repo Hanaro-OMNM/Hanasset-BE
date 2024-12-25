@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers("/users/logout/**").permitAll()
                                 .requestMatchers("/users/me/**").authenticated()
                                 .requestMatchers("/users/property/**").authenticated()
+                                .requestMatchers("/loan/**").authenticated()
                                 .requestMatchers("/markers/**").permitAll()
                                 .requestMatchers("/real-estates/**").permitAll()
                                 .requestMatchers("/users/bookmarks/**").authenticated()
