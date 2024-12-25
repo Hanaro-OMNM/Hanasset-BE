@@ -1,5 +1,7 @@
 package com.omnm.hanasset.loan.service;
 
+import com.omnm.hanasset.global.exception.CustomException;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.loan.dto.LoanDetailResponse;
 import com.omnm.hanasset.loan.dto.LoanInfoDTO;
 import com.omnm.hanasset.loan.dto.LoanRecommendInfoDTO;
@@ -43,8 +45,7 @@ public class LoanService {
     private final HousingTypeRepository housingTypeRepository;
 
     public LoanResponse getRecommendLoans(Long userId, List<Long> realEstateIds) {
-        // Exception 임시 처리
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Optional<Property> userProperty = propertyRepository.findByUser_UserId(userId);
         List<RealEstate> realEstates = realEstateRepository.findAllById(realEstateIds);
 
@@ -62,7 +63,7 @@ public class LoanService {
             List<LoanInfoDTO> hanaLoans = new ArrayList<>();
             List<LoanInfoDTO> beotimmokLoans = new ArrayList<>();
 
-            HousingType housingType = housingTypeRepository.findById(realEstate.getHousingType().getHousingTypeId()).orElseThrow();
+            HousingType housingType = housingTypeRepository.findById(realEstate.getHousingType().getHousingTypeId()).orElseThrow(() -> new CustomException(ErrorCode.REAL_ESTATE_NOT_FOUND));
             List<Loan> availableLoans;
             if (userProperty.isPresent()) {
                 availableLoans = loanRepository.findAvailableLoans(
@@ -90,7 +91,6 @@ public class LoanService {
                     beotimmokLoans.add(loanInfoDTO);
                 }
             }
-
 
             loanRecommendInfoDTOS.add(LoanRecommendInfoDTO.builder()
                     .realEstateInfoResponse(realEstateMapper.toRealEstateInfoResponse(realEstate))
@@ -125,9 +125,8 @@ public class LoanService {
     }
 
     public LoanDetailResponse getLoan(Long userId, Long loanId) {
-        // Exception 임시 처리
         Optional<Property> property = propertyRepository.findByUser_UserId(userId);
-        Loan loan = loanRepository.findById(loanId).orElseThrow();
+        Loan loan = loanRepository.findById(loanId).orElseThrow(() -> new CustomException(ErrorCode.LOAN_NOT_FOUND));
         LoanDetailResponse loanDetailDTO = loanMapper.loanToDetailResponse(loan);
         loanDetailDTO.setDsr(getNewDSR(property, loan));
         return loanDetailDTO;
