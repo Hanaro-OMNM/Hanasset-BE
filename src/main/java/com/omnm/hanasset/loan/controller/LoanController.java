@@ -32,9 +32,8 @@ public class LoanController {
     @Operation(summary = "대출 상세보기 조회", description = "대출의 상세정보를 조회한다. 이때 유저 정보를 바탕으로 갱신되는 dsr을 함께 보여준다.")
     @ApiResponse(responseCode = "200", description = "대출 상세보기 성공")
     @GetMapping("/detail/{loanId}")
-    public ApiResponseEntity<LoanDetailResponse> getLoan(@PathVariable("loanId") Long loanId) {
-        // userId = 1L
-        LoanDetailResponse loan = loanService.getLoan(1L, loanId);
+    public ApiResponseEntity<LoanDetailResponse> getLoan(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @PathVariable("loanId") Long loanId) {
+        LoanDetailResponse loan = loanService.getLoan(userDetailsDTO.getId(), loanId);
         return ApiResponseEntity.ok("대출 상세보기 성공", loan);
     }
 
