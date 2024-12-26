@@ -138,11 +138,11 @@ public class LoanService {
             originalAnnualRepayment = property.get().getAnnualPrinciple() + property.get().getAnnualInterest();
         }
         int newAnnualRepayment = getNewAnnualRepayment(loan);
-        int period = 1;
+        int income = 1;
         if (property.isPresent()) {
-            period = Math.max(1, property.get().getIncome());
+            income = Math.max(1, property.get().getIncome());
         }
-        return (double) Math.round((float) (originalAnnualRepayment + newAnnualRepayment) / period * 10000) / 100;
+        return (double) Math.round(((float)(originalAnnualRepayment + newAnnualRepayment) / income) * 10000) / 100;
     }
 
     private Integer getNewAnnualRepayment(Loan loan) {
