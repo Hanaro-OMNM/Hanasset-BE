@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "부동산 매물", description = "부동산 매물 API 목록")
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +24,14 @@ public class RealEstateController {
     public ApiResponseEntity<RealEstatesResponse> getRealEstates(@RequestParam Long housingComplexId) {
         RealEstatesResponse realEstates = realEstateService.getRealEstates(housingComplexId);
         return ApiResponseEntity.ok("매물 리스트 조회 성공",realEstates);
+    }
+
+    @Operation(summary= "최근에 확인한 매물 리스트 조회", description = "사용자가 최근에 확인한 매물 리스트를 조회한다.")
+    @ApiResponse(responseCode = "200", description = "최근 확인 매물 리스트 조회 성공")
+    @GetMapping("/recent-visited-list")
+    public ApiResponseEntity<RealEstatesResponse> getRecentVisitedRealEstates(@RequestParam List<Long> realEstatesIds) {
+        RealEstatesResponse recentVisitedRealEstates = realEstateService.getRecentVisitedRealEstates(realEstatesIds);
+        return ApiResponseEntity.ok("최근 확인 매물 리스트 조회 성공", recentVisitedRealEstates);
     }
 
     @Operation(summary = "시세 정보 조회", description = "특정 매물의 시세 정보 조회를 위한 외부 API 호출에 필요한 정보를 조회한다.")

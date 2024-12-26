@@ -25,6 +25,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
     private final RedisHandler redisHandler;
 
+    private static final String CONSULTANT_PREFIX = "CONSULTANT "; // 해당 토큰이 상담사 관련 토큰인지 명시하는 prefix
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -49,7 +51,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (tokenProvider.validateToken(accessToken)) {
                 if (!redisHandler.keyExists(accessToken)) {
-                    setAuthentication(accessToken); // 토큰이 유효하고 로그아웃 블랙리스트에도 없을 경우, 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
+                    String username = tokenProvider.getUsername(accessToken);
+
+                    if (username.length() >= CONSULTANT_PREFIX.length()) {
+                        if (username.startsWith(CONSULTANT_PREFIX)) {
+                            setConsultantAuthentication(accessToken);
+                        } else {
+                            setAuthentication(accessToken); // 토큰이 유효하고 로그아웃 블랙리스트에도 없을 경우, 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
+                        }
+                    } else {
+                        setAuthentication(accessToken); // 길이가 짧으면 일반 Authentication으로 처리
+                    }
                 } else {
                     handleInvalidToken(request, response, ErrorCode.LOGOUT_TOKEN);
                 }
@@ -80,8 +92,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String newAccessToken = tokenProvider.generateAccessToken(username);
                 // 새로운 Access token을 헤더에 추가
                 response.setHeader("Authorization", "Bearer " + newAccessToken);
-                // Authentication 설정
-                setAuthentication(newAccessToken);
+
+                if (username.startsWith(CONSULTANT_PREFIX)) {
+                    setConsultantAuthentication(newAccessToken);
+                } else {
+                    setAuthentication(newAccessToken);
+                }
             } else {
                 // 유효하지 않거나 일치하지 않는 리프레시 토큰 처리
                 logger.error("Refresh token is invalid or expired");
@@ -102,6 +118,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void setAuthentication(String token) {
         // 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
         SecurityContextHolder.getContext().setAuthentication(tokenProvider.getAuthentication(token));
+    }
+
+    private void setConsultantAuthentication(String token) {
+        SecurityContextHolder.getContext().setAuthentication(tokenProvider.getConsultantAuthentication(token));
     }
 
     // 토큰 관련 예외 처리

@@ -1,11 +1,12 @@
 package com.omnm.hanasset.user.dto;
 
-import jakarta.persistence.Column;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+@Schema(description = "이메일 회원가입 요청")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

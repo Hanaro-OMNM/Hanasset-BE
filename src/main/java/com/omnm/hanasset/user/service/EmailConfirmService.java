@@ -1,7 +1,8 @@
 package com.omnm.hanasset.user.service;
 
 import com.omnm.hanasset.global.config.RedisHandler;
-import com.omnm.hanasset.user.exception.EmailException;
+import com.omnm.hanasset.global.exception.CustomException;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,7 @@ public class EmailConfirmService {
 
         // 인증 코드가 일치하지 않는 경우
         if (!code.equals(savedCode)) {
-            throw new EmailException("이메일 인증 코드가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.CODE_NOT_MATCHED);
         }
 
         mailConfirm(email); // redis에 저장: <String, String> key는 이메일, value는 "confirmed"
@@ -72,7 +73,7 @@ public class EmailConfirmService {
             message.setText(msgContent.toString(),"UTF-8", "html");
 
         } catch (MessagingException e) {
-            throw new EmailException("메일 생성에 실패했습니다.");
+            throw new CustomException(ErrorCode.EMAIL_SEND_FAILED);
         }
 
         return message;

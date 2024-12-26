@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Entity(name = "USER")
+@Entity(name = "user")
 public class User {
     @Id
     @Column(name = "user_id", nullable = false)
@@ -49,5 +49,13 @@ public class User {
 
     public void updateBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 }
