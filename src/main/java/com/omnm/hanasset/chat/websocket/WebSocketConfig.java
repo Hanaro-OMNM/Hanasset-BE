@@ -16,6 +16,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final TokenProvider tokenProvider;
+    private final WebSocketAuthInterceptor webSocketAuthInterceptor;
+
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -33,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         // Register the interceptor to validate the token for each WebSocket message
-        registration.interceptors(new WebSocketAuthInterceptor(tokenProvider));  // Token validation interceptor
+        registration.interceptors(webSocketAuthInterceptor);  // Token validation interceptor
     }
 
 }
