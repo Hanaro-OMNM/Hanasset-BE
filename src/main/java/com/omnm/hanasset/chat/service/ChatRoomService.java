@@ -2,6 +2,7 @@ package com.omnm.hanasset.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omnm.hanasset.bookmark.repository.BookmarkRealEstateRepository;
 import com.omnm.hanasset.chat.dto.*;
 import com.omnm.hanasset.chat.entity.ChatMessage;
 import com.omnm.hanasset.chat.entity.ChatRoom;
@@ -11,6 +12,8 @@ import com.omnm.hanasset.chat.repository.ChatMessageRepository;
 import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.repository.ConsultingItemRepository;
 import com.omnm.hanasset.chat.utils.ChatMapper;
+import com.omnm.hanasset.consultant.entity.Consultant;
+import com.omnm.hanasset.consultant.repository.ConsultantRepository;
 import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.user.entity.User;
@@ -51,6 +54,8 @@ public class ChatRoomService {
     private static final String CHATROOM_KEY_PREFIX = "chatroom:";
     private final ConsultingItemRepository consultingItemRepository;
     private final UserRepository userRepository;
+    private final ConsultantRepository consultantRepository;
+    private final BookmarkRealEstateRepository bookmarkRealEstateRepository;
 
     public ChatroomResponse findAll() {
         List<ChatRoom> allChatrooms = chatRoomRepository.findAll();
@@ -65,16 +70,25 @@ public class ChatRoomService {
     public ChatroomResponse createRoom(Long userId, Long consultantId, String chatroomTitle, LocalDateTime reservedTime,  List<ReservationInfoDTO> reservationInfo) {
         String reservationInfoJson = convertReservationInfoToJson(reservationInfo);
 
+        // Find the User and Consultant entities by their IDs
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        Consultant consultant = consultantRepository.findById(consultantId)
+                .orElseThrow(() -> new IllegalArgumentException("Consultant not found with ID: " + consultantId));
+
+        // Build the ChatRoom entity
         ChatRoom chatRoomEntity = ChatRoom.builder()
                 .chatroomId(UUID.randomUUID().toString())
-                .userId(userId)
-                .consultantId(consultantId)
+                .user(user)
+                .consultant(consultant)
                 .chatroomTitle(chatroomTitle)
                 .chatroomStatus("waiting")
                 .createdAt(LocalDateTime.now())
                 .reservedTime(reservedTime)
                 .reservationInfo(reservationInfoJson)
                 .build();
+
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoomEntity);
 
         if (reservationInfo != null && !reservationInfo.isEmpty()) {
@@ -85,9 +99,9 @@ public class ChatRoomService {
                 log.info("Saving ConsultingItem: realEstateId={}, housingComplexId={}", realEstateId, housingComplexId);
 
                 ConsultingItem consultingItem = ConsultingItem.builder()
-                        .chatroomId(savedChatRoom.getChatroomId())
-                        .realEstateId(realEstateId)
-                        .housingComplexId(housingComplexId)
+                        .chatroom(savedChatRoom) // ChatRoom 객체를 직접 설정
+                        .realEstate(bookmarkRealEstateRepository.findById(realEstateId)
+                                .orElseThrow(() -> new IllegalArgumentException("RealEstate not found with ID: " + realEstateId)))
                         .build();
                 consultingItemRepository.save(consultingItem);
             }
@@ -188,7 +202,7 @@ public class ChatRoomService {
         List<WaitingRoomDTO> waitingRoomDTOS = waitingRooms.stream()
                 .map(chatRoom -> {
                     // Fetch user information
-                    User user = userRepository.findById(chatRoom.getUserId())
+                    User user = userRepository.findById(chatRoom.getUser().getUserId())
                             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
                     // Build WaitingRoomDTO
@@ -246,7 +260,7 @@ public class ChatRoomService {
             List<ChatRoom> foundWaitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId, startOfDay, endOfDay);
             waitingRooms = foundWaitingRooms.stream()
                     .map(chatRoom -> {
-                        User user = userRepository.findById(chatRoom.getUserId())
+                        User user = userRepository.findById(chatRoom.getUser().getUserId())
                                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
                         return WaitingRoomDTO.builder()
                                 .userName(user.getName())

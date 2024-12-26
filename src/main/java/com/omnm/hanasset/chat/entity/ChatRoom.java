@@ -3,6 +3,8 @@ package com.omnm.hanasset.chat.entity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omnm.hanasset.chat.dto.ReservationInfoDTO;
+import com.omnm.hanasset.consultant.entity.Consultant;
+import com.omnm.hanasset.user.entity.User;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -19,32 +21,33 @@ import java.util.List;
 @Table(name = "chatroom")
 public class ChatRoom {
     @Id
-    @Column(name="chatroom_id")
+    @Column(name = "chatroom_id", nullable = false, length = 255)
     private String chatroomId;
 
-    @Column(name="user_id")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name="consultant_id")
-    private Long consultantId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultant_id", nullable = false)
+    private Consultant consultant;
 
-    @Column(name="chatroom_title")
+    @Column(name = "chatroom_title", length = 255)
     private String chatroomTitle;
 
-    @Column(name="chatroom_status")
-    private String chatroomStatus; // 'waiting', 'active', 'done', 'canceled'
+    @Column(name = "chatroom_status", length = 255)
+    private String chatroomStatus;
 
-    @Column(name="reserved_time")
+    @Column(name = "reserved_time")
     private LocalDateTime reservedTime;
 
-    @Column(name="finished_at")
+    @Column(name = "finished_at")
     private LocalDateTime finishedAt;
 
-    @Column(name="created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Lob
-    @Column(name = "reservation_info")
-    private String reservationInfo; // JSON 문자열로 저장
+    @Column(name = "reservation_info", columnDefinition = "TEXT")
+    private String reservationInfo;
 
 }

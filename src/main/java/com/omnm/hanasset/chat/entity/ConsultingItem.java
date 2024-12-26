@@ -1,5 +1,6 @@
 package com.omnm.hanasset.chat.entity;
 
+import com.omnm.hanasset.bookmark.entity.BookmarkRealEstate;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,15 +15,15 @@ public class ConsultingItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "consulting_item_id")
+    @Column(name = "consulting_item_id", nullable = false)
     private Long consultingItemId;
 
-    @Column(name = "chatroom_id", nullable = false)
-    private String chatroomId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chatroom_id", nullable = false)
+    private ChatRoom chatroom;
 
-    @Column(name = "real_estate_id", nullable = false)
-    private Long realEstateId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "real_estate_id", nullable = false)
+    private BookmarkRealEstate realEstate;
 
-    @Column(name = "housing_complex_id", nullable = false)
-    private Long housingComplexId;
 }

@@ -15,14 +15,14 @@ import java.util.Optional;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 
     // Assuming ChatRoomRepository is a JPA repository
-    @Query("SELECT c FROM ChatRoom c WHERE c.consultantId = :consultantId AND c.chatroomStatus = 'waiting' AND c.reservedTime >= :startOfDay AND c.reservedTime < :endOfDay")
+    @Query("SELECT c FROM ChatRoom c WHERE c.consultant.consultantId = :consultantId AND c.chatroomStatus = 'waiting' AND c.reservedTime >= :startOfDay AND c.reservedTime < :endOfDay")
     List<ChatRoom> findWaitingRoomsByConsultantIdAndReservedDate(
             @Param("consultantId") Long consultantId,
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay
     );
 
-    @Query("SELECT c.chatroomId FROM ChatRoom c WHERE c.userId = :userId AND c.chatroomStatus = :chatroomStatus")
+    @Query("SELECT c.chatroomId FROM ChatRoom c WHERE c.user.userId = :userId AND c.chatroomStatus = :chatroomStatus")
     Optional<String> findRoomIdByUserIdAndStatus(@Param("userId") Long userId, @Param("chatroomStatus") String chatroomStatus);
 
     // 1. 상태를 업데이트하는 쿼리
@@ -54,7 +54,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
     @Query("SELECT c FROM ChatRoom c WHERE c.chatroomId = :chatroomId")
     Optional<ChatRoom> findByChatroomId(@Param("chatroomId") String chatroomId);
 
-    @Query("SELECT cr FROM ChatRoom cr WHERE cr.userId = :userId AND cr.chatroomStatus = 'completed'")
+    @Query("SELECT cr FROM ChatRoom cr WHERE cr.user.userId = :userId AND cr.chatroomStatus = 'completed'")
     List<ChatRoom> findCompletedChatroomsByUserId(@Param("userId") Long userId);
 
 
