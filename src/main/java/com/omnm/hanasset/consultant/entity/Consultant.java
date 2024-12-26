@@ -28,8 +28,10 @@ public class Consultant {
     private String password;
 
     @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at", updatable = false)
     private LocalDateTime updatedAt;
 }
