@@ -9,6 +9,7 @@ import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.service.ChatRoomService;
 import com.omnm.hanasset.chat.utils.ChatMapper;
 import com.omnm.hanasset.global.common.ApiResponseEntity;
+import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -44,9 +46,19 @@ public class ChatRoomController {
     @Operation(summary = "채팅방 생성", description = "새로운 채팅방을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "채팅방 생성 성공")
     @PostMapping("/create")
-    public ApiResponseEntity<ChatroomResponse> createChatroom(@RequestBody ChatRoomDTO request) {
-        ChatroomResponse response = chatRoomService.createRoom(request.getUserId(),request.getConsultantId(),request.getChatroomTitle(), request.getReservedTime());
+    public ApiResponseEntity<ChatroomResponse> createChatroom(
+            @AuthenticationPrincipal UserDetailsDTO userDetailsDTO,
+            @RequestBody ChatRoomDTO request) {
+        Long userId = userDetailsDTO.getId();
+        ChatroomResponse response = chatRoomService.createRoom(
+                userId,
+                request.getConsultantId(),
+                request.getChatroomTitle(),
+                request.getReservedTime(),
+                request.getReservationInfo()
+        );
 
+        System.out.printf("Received reservationInfo: {}", request.getReservationInfo());
         return ApiResponseEntity.ok("채팅방 생성 성공", response);
     }
 
@@ -77,7 +89,10 @@ public class ChatRoomController {
     @Operation(summary = "예약된 상담 조회", description = "특정 유저의 예약된 상담을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "예약 상담 조회 성공")
     @GetMapping("/findRoom")
-    public ApiResponseEntity<Object> findRoomDetails(@RequestParam Long userId, @RequestParam String chatroomStatus) {
+    public ApiResponseEntity<Object> findRoomDetails(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestParam String chatroomStatus) {
+        Long userId = userDetailsDTO.getId();
+        System.out.printf("Received userId: %d, chatroomStatus: %s%n", userId, chatroomStatus);
+
         try {
             // DB에서 직접 조회
             ChatRoom chatRoom = chatRoomRepository.findRoomIdByUserIdAndStatus(userId, chatroomStatus)
@@ -117,6 +132,8 @@ public class ChatRoomController {
                 return ApiResponseEntity.fail(ErrorCode.BAD_REQUEST)
                         .withMessage("Invalid state: " + currentState);
             }
+
+            int rowsUpdated = chatRoomRepository.updateStatusByChatroomId(chatroomId, currentState, newState);
 
             // Call appropriate service method based on state transition
             ChatroomResponse response;
@@ -165,7 +182,8 @@ public class ChatRoomController {
     @Operation(summary = "완료된 채팅방 조회", description = "특정 사용자의 완료된 채팅방 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "완료된 채팅방 조회 성공")
     @GetMapping("/completed-chatrooms")
-    public ApiResponseEntity<ChatroomResponse> getCompletedChatroomsByUserId(@RequestParam Long userId) {
+    public ApiResponseEntity<ChatroomResponse> getCompletedChatroomsByUserId(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
+        Long userId = userDetailsDTO.getId();
         ChatroomResponse response = chatRoomService.getCompletedChatroomsByUserId(userId);
         return ApiResponseEntity.ok("완료된 채팅방 조회 성공", response);
     }
