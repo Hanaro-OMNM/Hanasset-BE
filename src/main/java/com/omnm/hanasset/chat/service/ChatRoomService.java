@@ -2,15 +2,17 @@ package com.omnm.hanasset.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnm.hanasset.chat.dto.ChatMessageDTO;
-import com.omnm.hanasset.chat.dto.ChatMessageResponse;
-import com.omnm.hanasset.chat.dto.ChatroomResponse;
+import com.omnm.hanasset.chat.dto.*;
 import com.omnm.hanasset.chat.entity.ChatMessage;
 import com.omnm.hanasset.chat.entity.ChatRoom;
 import com.omnm.hanasset.chat.redis.service.RedisStreamSubscriber;
 import com.omnm.hanasset.chat.repository.ChatMessageRepository;
 import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.utils.ChatMapper;
+import com.omnm.hanasset.global.exception.CustomException;
+import com.omnm.hanasset.global.exception.code.ErrorCode;
+import com.omnm.hanasset.user.entity.User;
+import com.omnm.hanasset.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,6 @@ import org.springframework.data.redis.connection.stream.StreamReadOptions;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import com.omnm.hanasset.chat.dto.ChatRoomDTO;
 
 
 import java.time.Duration;
@@ -46,6 +47,11 @@ public class ChatRoomService {
     private final RedisTemplate<String, Object> redisStreamTemplate; // 수정된 RedisTemplate
     private final ObjectMapper objectMapper;
     private static final String CHATROOM_KEY_PREFIX = "chatroom:";
+
+    private final UserRepository userRepository;
+    // getUserInfo(Long UserId)
+    // userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    // user.getName()
 
     public ChatroomResponse findAll() {
         List<ChatRoom> allChatrooms = chatRoomRepository.findAll();
@@ -89,6 +95,8 @@ public class ChatRoomService {
         } catch (Exception e) {
             log.error("Error while publishing chat room information to stream '{}': {}", streamKey, e.getMessage(), e);
         }
+
+        enterChatRoom(chatRoomDTO.getChatroomId());
 
         // Waiting room 처리
         if (reservedTime.toLocalDate().equals(LocalDate.now())) {
@@ -150,9 +158,7 @@ public class ChatRoomService {
         }
     }
 
-    /**
-     * Redis Stream에 대기방 추가
-     */
+    // Redis Stream에 대기방 추가
     public void addWaitingRoomToStream(Long consultantId) {
         String streamKey = "consultant:" + consultantId + ":waiting_rooms";
         String groupName = "waiting_groups:" + consultantId;
@@ -162,32 +168,42 @@ public class ChatRoomService {
         List<ChatRoom> waitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(
                 consultantId, startOfDay, endOfDay);
 
-        List<ChatRoomDTO> chatRoomDTOS = waitingRooms.stream()
-                .map(chatMapper::toChatRoomDTO)  // ChatMapper 사용
+        List<WaitingRoomDTO> waitingRoomDTOS = waitingRooms.stream()
+                .map(chatRoom -> {
+                    // Fetch user information
+                    User user = userRepository.findById(chatRoom.getUserId())
+                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+                    // Build WaitingRoomDTO
+                    return WaitingRoomDTO.builder()
+                            .userName(user.getName())
+                            .chatroom(chatMapper.toChatRoomDTO(chatRoom))
+                            .build();
+                })
                 .collect(Collectors.toList());
 
-        try {
+        createConsumerGroup(streamKey, groupName);
+        syncWaitingRoomsToRedis(streamKey, waitingRoomDTOS);
 
-            createConsumerGroup(streamKey, groupName);
-            // Serialize the chatRoomDTO to JSON
-            String json = objectMapper.writeValueAsString(chatRoomDTOS);
+        // Set expiration (12 hours = 43200 seconds)
+        redisStreamTemplate.expire(streamKey, 12, TimeUnit.HOURS);
+    }
 
-            // Add the message to the stream
-            redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
-
-            // Set expiration (12 hours = 43200 seconds)
-            redisStreamTemplate.expire(streamKey, 12, TimeUnit.HOURS);
-
-            log.info("Added waiting room to stream '{}': {}", streamKey, json);
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing ChatRoomDTO: {}", e.getMessage(), e);
+    private void syncWaitingRoomsToRedis(String streamKey, List<WaitingRoomDTO> waitingRooms) {
+        for (WaitingRoomDTO waitingRoomDTO : waitingRooms) {
+            try {
+                String json = objectMapper.writeValueAsString(waitingRoomDTO);
+                redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("waitingRoom", json));
+            } catch (Exception e) {
+                log.error("Error syncing waiting room to Redis: {}", e.getMessage());
+            }
         }
     }
 
     // 대기방 조회
-    public ChatroomResponse getWaitingRooms(Long consultantId) {
+    public WaitingRoomResponse getWaitingRooms(Long consultantId) {
         String streamKey = "consultant:" + consultantId + ":waiting_rooms";
-        List<ChatRoomDTO> chatRooms = new ArrayList<>();
+        List<WaitingRoomDTO> waitingRooms = new ArrayList<>();
 
         try {
             List<MapRecord<String, Object, Object>> messages = redisStreamTemplate.opsForStream()
@@ -198,8 +214,8 @@ public class ChatRoomService {
                     Map<Object, Object> rawData = message.getValue();
                     for (Object key : rawData.keySet()) {
                         String json = rawData.get(key).toString();
-                        ChatRoomDTO chatRoomDTO = objectMapper.readValue(json, ChatRoomDTO.class);
-                        chatRooms.add(chatRoomDTO);
+                        WaitingRoomDTO waitingRoomDTO = objectMapper.readValue(json, WaitingRoomDTO.class);
+                        waitingRooms.add(waitingRoomDTO);
                     }
                 }
             }
@@ -207,29 +223,26 @@ public class ChatRoomService {
             log.error("Error fetching waiting rooms from Redis: {}", e.getMessage());
         }
 
-        if (chatRooms.isEmpty()) {
+        if (waitingRooms.isEmpty()) {
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-            List<ChatRoom> waitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId, startOfDay, endOfDay);
-            chatRooms = waitingRooms.stream()
-                    .map(chatMapper::toChatRoomDTO)
+            List<ChatRoom> foundWaitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId, startOfDay, endOfDay);
+            waitingRooms = foundWaitingRooms.stream()
+                    .map(chatRoom -> {
+                        User user = userRepository.findById(chatRoom.getUserId())
+                                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                        return WaitingRoomDTO.builder()
+                                .userName(user.getName())
+                                .chatroom(chatMapper.toChatRoomDTO(chatRoom))
+                                .build();
+                    })
                     .collect(Collectors.toList());
-            syncWaitingRoomsToRedis(streamKey, chatRooms);
+            syncWaitingRoomsToRedis(streamKey, waitingRooms);
         }
 
-        return new ChatroomResponse(chatRooms.size(), chatRooms);
+        return new WaitingRoomResponse(waitingRooms.size(), waitingRooms);
     }
 
-    private void syncWaitingRoomsToRedis(String streamKey, List<ChatRoomDTO> chatRooms) {
-        for (ChatRoomDTO chatRoomDTO : chatRooms) {
-            try {
-                String json = objectMapper.writeValueAsString(chatRoomDTO);
-                redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
-            } catch (Exception e) {
-                log.error("Error syncing waiting room to Redis: {}", e.getMessage());
-            }
-        }
-    }
 
     private void removeRoomFromRedis(String chatroomId, Long consultantId) {
         String streamKey = "consultant:" + consultantId + ":waiting_rooms";
@@ -240,12 +253,12 @@ public class ChatRoomService {
 
             for (MapRecord<String, Object, Object> message : messages) {
                 Map<Object, Object> rawData = message.getValue();
-                if (rawData.containsKey("chatRoom")) {
-                    String json = rawData.get("chatRoom").toString();
-                    ChatRoomDTO chatRoomDTO = objectMapper.readValue(json, ChatRoomDTO.class);
+                if (rawData.containsKey("waitingRoom")) {
+                    String json = rawData.get("waitingRoom").toString();
+                    WaitingRoomDTO waitingRoomDTO = objectMapper.readValue(json, WaitingRoomDTO.class);
 
                     // chatroomId가 일치하는 메시지 삭제
-                    if (chatRoomDTO.getChatroomId().equals(chatroomId)) {
+                    if (waitingRoomDTO.getChatroom().getChatroomId().equals(chatroomId)) {
                         redisStreamTemplate.opsForStream().delete(streamKey, message.getId());
                         log.info("Removed room [{}] from Redis waiting rooms.", chatroomId);
                         break;
@@ -256,6 +269,7 @@ public class ChatRoomService {
             log.error("Error removing room [{}] from Redis: {}", chatroomId, e.getMessage());
         }
     }
+
 
     public ChatroomResponse updateChatRoomStatus(String chatroomId, String currentState, String newState) {
         int rowsUpdated = chatRoomRepository.updateStatusByChatroomId(chatroomId, currentState, newState);
@@ -280,8 +294,9 @@ public class ChatRoomService {
         ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(updatedChatRoom);
         return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
 
+    }
 
-    }public ChatroomResponse updateActiveToCompleted(String chatroomId, String currentState, String newState) {
+    public ChatroomResponse updateActiveToCompleted(String chatroomId, String currentState, String newState) {
         if (!"active".equals(currentState) || !"completed".equals(newState)) {
             throw new IllegalArgumentException("Invalid state transition: " + currentState + " to " + newState);
         }

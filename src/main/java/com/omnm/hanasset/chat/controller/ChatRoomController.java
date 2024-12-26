@@ -3,6 +3,7 @@ package com.omnm.hanasset.chat.controller;
 import com.omnm.hanasset.chat.dto.ChatMessageResponse;
 import com.omnm.hanasset.chat.dto.ChatRoomDTO;
 import com.omnm.hanasset.chat.dto.ChatroomResponse;
+import com.omnm.hanasset.chat.dto.WaitingRoomResponse;
 import com.omnm.hanasset.chat.entity.ChatRoom;
 import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.service.ChatRoomService;
@@ -52,8 +53,8 @@ public class ChatRoomController {
     @Operation(summary = "대기방 조회", description = "특정 상담사의 대기방 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "대기방 조회 성공")
     @GetMapping("/waiting/{consultantId}")
-    public ApiResponseEntity<ChatroomResponse> getWaitingRooms(@PathVariable Long consultantId) {
-        ChatroomResponse response = chatRoomService.getWaitingRooms(consultantId);
+    public ApiResponseEntity<WaitingRoomResponse> getWaitingRooms(@PathVariable Long consultantId) {
+        WaitingRoomResponse response = chatRoomService.getWaitingRooms(consultantId);
         return ApiResponseEntity.ok("대기방 조회 성공", response);
     }
 
