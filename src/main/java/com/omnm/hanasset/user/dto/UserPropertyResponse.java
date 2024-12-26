@@ -3,7 +3,7 @@ package com.omnm.hanasset.user.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-@Schema(description = "손님 정보 및 자산 정보")
+@Schema(description = "손님 기본 정보 및 자산 정보")
 @Getter
 @Setter
 @Builder

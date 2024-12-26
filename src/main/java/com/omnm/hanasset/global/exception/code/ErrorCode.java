@@ -29,6 +29,10 @@ public enum ErrorCode {
     // RealEstate ErrorCode
     REAL_ESTATE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 부동산이 존재하지 않습니다."),
 
+
+    // Property ErrorCode
+    PROPERTY_NOT_FOUND(HttpStatus.NOT_FOUND, "자산 정보가 존재하지 않습니다."),
+
     // Consultant ErrorCode
     CONSULTANT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상담사가 존재하지 않습니다.");
 

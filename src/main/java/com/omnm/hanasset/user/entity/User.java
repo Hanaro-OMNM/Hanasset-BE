@@ -50,4 +50,12 @@ public class User {
     public void updateBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }

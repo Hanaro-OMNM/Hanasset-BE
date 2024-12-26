@@ -5,12 +5,14 @@ import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.user.dto.*;
 import com.omnm.hanasset.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-@Slf4j
+@Tag(name = "손님", description = "손님 API 목록")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
@@ -27,6 +29,8 @@ public class UserController {
 
     private final UserService userService;
 
+    @Operation(summary = "이메일 회원가입", description = "유저의 이메일을 이용해 회원가입을 시도한다.")
+    @ApiResponse(responseCode = "200", description = "이메일 회원가입 성공")
     @PostMapping("/signup")
     public ApiResponseEntity<?> signup(
             @RequestBody @Valid EmailSignUpRequest emailSignUpRequest, HttpServletResponse response) throws IOException {
@@ -36,6 +40,8 @@ public class UserController {
         return ApiResponseEntity.ok("이메일 회원가입 성공", null);
     }
 
+    @Operation(summary = "일반 로그인", description = "유저의 이메일을 이용해 로그인을 시도한다.")
+    @ApiResponse(responseCode = "200", description = "일반 로그인 성공")
     @PostMapping("/signin")
     public ResponseEntity<UserResponse<?>> signin(
         @RequestBody @Valid EmailSignInRequest emailSignInRequest, HttpServletResponse response
@@ -57,6 +63,8 @@ public class UserController {
         return ResponseEntity.ok().headers(headers).body(UserResponse.builder().message("일반 로그인 성공").build());
     }
 
+    @Operation(summary = "생년월일 정보 입력", description = "유저의 생년월일 정보 입력을 시도한다.")
+    @ApiResponse(responseCode = "200", description = "생년월일 입력 성공")
     @PostMapping("/birth")
     public ApiResponseEntity<?> birth(@RequestBody @Valid BirthRequest birthRequest) {
         userService.setBirthDate(birthRequest);
@@ -64,6 +72,8 @@ public class UserController {
         return ApiResponseEntity.ok("생년월일 입력 성공", null);
     }
 
+    @Operation(summary = "로그아웃", description = "로그아웃을 시도한다.")
+    @ApiResponse(responseCode = "200", description = "로그아웃 성공")
     @PostMapping("/logout")
     public ApiResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String logoutResult = userService.logout(request);
@@ -81,11 +91,23 @@ public class UserController {
         return ApiResponseEntity.ok(logoutResult, null);
     }
 
+    @Operation(summary = "회원 정보 불러오기", description = "유저의 기본 정보 조회를 시도한다.")
+    @ApiResponse(responseCode = "200", description = "회원 정보 조회 성공")
     @GetMapping("/me")
     public ApiResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
         Long userId = userDetailsDTO.getId();
         UserInfoResponse userInfo = userService.getUserInfo(userId);
 
         return ApiResponseEntity.ok("회원 정보 조회 성공", userInfo);
+    }
+
+    @Operation(summary = "회원 정보 수정하기", description = "유저의 이름 및 비밀번호 수정을 시도한다.")
+    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공")
+    @PutMapping("/me")
+    public ApiResponseEntity<?> updateUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestBody @Valid UserInfoRequest userInfoRequest) {
+        Long userId = userDetailsDTO.getId();
+        userService.updateUserInfo(userId, userInfoRequest);
+
+        return ApiResponseEntity.ok("회원 정보 수정 성공", null);
     }
 }
