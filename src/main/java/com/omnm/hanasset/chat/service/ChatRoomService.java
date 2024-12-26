@@ -6,7 +6,7 @@ import com.omnm.hanasset.chat.dto.*;
 import com.omnm.hanasset.chat.entity.ChatMessage;
 import com.omnm.hanasset.chat.entity.ChatRoom;
 import com.omnm.hanasset.chat.entity.ConsultingItem;
-import com.omnm.hanasset.chat.redis.service.RedisStreamSubscriber;
+import com.omnm.hanasset.chat.redis.RedisStreamSubscriber;
 import com.omnm.hanasset.chat.repository.ChatMessageRepository;
 import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.repository.ConsultingItemRepository;
@@ -49,13 +49,8 @@ public class ChatRoomService {
     private final RedisTemplate<String, Object> redisStreamTemplate; // 수정된 RedisTemplate
     private final ObjectMapper objectMapper;
     private static final String CHATROOM_KEY_PREFIX = "chatroom:";
-
-
     private final ConsultingItemRepository consultingItemRepository;
     private final UserRepository userRepository;
-    // getUserInfo(Long UserId)
-    // userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    // user.getName()
 
     public ChatroomResponse findAll() {
         List<ChatRoom> allChatrooms = chatRoomRepository.findAll();
@@ -66,7 +61,6 @@ public class ChatRoomService {
 
         return new ChatroomResponse(chatRoomDTOList.size(), chatRoomDTOList);
     }
-
 
     public ChatroomResponse createRoom(Long userId, Long consultantId, String chatroomTitle, LocalDateTime reservedTime,  List<ReservationInfoDTO> reservationInfo) {
         String reservationInfoJson = convertReservationInfoToJson(reservationInfo);
@@ -82,7 +76,6 @@ public class ChatRoomService {
                 .reservationInfo(reservationInfoJson)
                 .build();
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoomEntity);
-
 
         if (reservationInfo != null && !reservationInfo.isEmpty()) {
             for (ReservationInfoDTO item : reservationInfo) {
@@ -267,7 +260,6 @@ public class ChatRoomService {
         return new WaitingRoomResponse(waitingRooms.size(), waitingRooms);
     }
 
-
     public void removeRoomFromRedis(String chatroomId, Long consultantId) {
         String streamKey = "consultant:" + consultantId + ":waiting_rooms";
         try {
@@ -294,7 +286,6 @@ public class ChatRoomService {
         }
     }
 
-
     private ChatRoom fetchAndValidateChatRoom(String chatroomId, String expectedState, String newState) {
         ChatRoom chatRoom = chatRoomRepository.findByChatroomId(chatroomId)
                 .orElseThrow(() -> new RuntimeException("No ChatRoom found: " + chatroomId));
@@ -309,7 +300,6 @@ public class ChatRoomService {
 
         return chatRoom;
     }
-
 
     public ChatroomResponse updateChatRoomStatus(String chatroomId, String currentState, String newState) {
         int rowsUpdated = chatRoomRepository.updateStatusByChatroomId(chatroomId, currentState, newState);
@@ -350,8 +340,6 @@ public class ChatRoomService {
         ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(updatedChatRoom);
         return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
     }
-
-
 
     public ChatRoomDTO findRoom(Long userId, String chatroomStatus) {
         String redisKey = CHATROOM_KEY_PREFIX + userId + ":" + chatroomStatus;
@@ -397,7 +385,6 @@ public class ChatRoomService {
 
         return new ChatroomResponse(chatRoomDTOList.size(), chatRoomDTOList);
     }
-
 
     public ChatMessageResponse getMessagesByChatroomId(String chatroomId) {
         List<ChatMessage> chatMessages = chatMessageRepository.findMessagesByChatroomId(chatroomId);

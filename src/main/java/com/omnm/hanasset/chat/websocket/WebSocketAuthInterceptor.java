@@ -26,10 +26,8 @@ import javax.security.auth.login.LoginException;
 @Log4j2
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
-
     private final TokenProvider tokenProvider;
     private static final String BEARER_PREFIX = "Bearer ";
-
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {

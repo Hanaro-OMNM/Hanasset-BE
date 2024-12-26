@@ -154,9 +154,6 @@ public class ChatRoomController {
         }
     }
 
-
-
-
     // 다음 상태를 결정하는 유틸리티 메서드
     private String determineNextState(String currentState) {
         if ("waiting".equalsIgnoreCase(currentState)) {
@@ -176,9 +173,6 @@ public class ChatRoomController {
         return redisStreamTemplate.expire(key, 1, TimeUnit.HOURS);
     }
 
-
-
-
     @Operation(summary = "완료된 채팅방 조회", description = "특정 사용자의 완료된 채팅방 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "완료된 채팅방 조회 성공")
     @GetMapping("/completed-chatrooms")
@@ -187,7 +181,6 @@ public class ChatRoomController {
         ChatroomResponse response = chatRoomService.getCompletedChatroomsByUserId(userId);
         return ApiResponseEntity.ok("완료된 채팅방 조회 성공", response);
     }
-
 
     @Operation(summary = "특정 채팅방 메시지 조회", description = "특정 채팅방의 메시지 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "메시지 조회 성공")

@@ -21,10 +21,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns("*")
-//                .setAllowedOrigins("http://localhost:3000", "http://localhost:5173") // WebSocket에 명시적 Origin 설정
                 .withSockJS();
     }
-
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -37,6 +35,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Register the interceptor to validate the token for each WebSocket message
         registration.interceptors(new WebSocketAuthInterceptor(tokenProvider));  // Token validation interceptor
     }
-
 
 }

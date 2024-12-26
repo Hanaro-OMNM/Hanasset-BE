@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Schema(description = "채팅방 DTO")
 public class WaitingRoomDTO {
-
-
     @Schema(description = "유저 정보 ")
     private String userName;
 

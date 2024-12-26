@@ -1,6 +1,7 @@
-package com.omnm.hanasset.chat.redis.service;
+package com.omnm.hanasset.chat.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -10,15 +11,11 @@ import java.util.Collections;
 
 @Log4j2
 @Service
+@RequiredArgsConstructor
 public class RedisStreamPublisher {
 
     private final RedisTemplate<String, Object> redisStreamTemplate;
     private final ObjectMapper objectMapper;
-
-    public RedisStreamPublisher(RedisTemplate<String, Object> redisStreamTemplate, ObjectMapper objectMapper) {
-        this.redisStreamTemplate = redisStreamTemplate;
-        this.objectMapper = objectMapper;
-    }
 
     public void publishMessage(String chatroomId, ChatMessageDTO message) {
         String streamKey = "stream_" + chatroomId; // 채팅방 ID 기반 Stream Key

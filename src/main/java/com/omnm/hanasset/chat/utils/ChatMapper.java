@@ -56,7 +56,6 @@ public interface ChatMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     ChatRoom toChatRoom(ChatRoomDTO chatRoomDTO);
 
-    // 추가적으로 필요할 경우, 변환 로직 구현
     default List<ReservationInfoDTO> mapStringToReservationInfo(String reservationInfoJson) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {

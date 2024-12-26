@@ -1,7 +1,8 @@
-package com.omnm.hanasset.chat.redis.service;
+package com.omnm.hanasset.chat.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omnm.hanasset.chat.dto.ChatMessageDTO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,15 +16,12 @@ import java.util.UUID;
 
 @Log4j2
 @Service
+@RequiredArgsConstructor
 public class RedisStreamSubscriber {
 
     private final RedisTemplate<String, Object> redisStreamTemplate;
     private final ObjectMapper objectMapper;
 
-    public RedisStreamSubscriber(RedisTemplate<String, Object> redisStreamTemplate, ObjectMapper objectMapper) {
-        this.redisStreamTemplate = redisStreamTemplate;
-        this.objectMapper = objectMapper;
-    }
 
     public List<ChatMessageDTO> consumeMessages(String chatroomId) {
         String streamKey = "stream_" + chatroomId; // 스트림 키
@@ -56,8 +54,6 @@ public class RedisStreamSubscriber {
                         for (Object key : rawData.keySet()) {
                             String json = rawData.get(key).toString(); // JSON 문자열로 변환
                             ChatMessageDTO chatMessage = objectMapper.readValue(json, ChatMessageDTO.class); // JSON -> DTO로 변환
-//                            log.info("ChatMessage JSON: {}", json);
-//                            log.info("ChatMessage DTO: {}", chatMessage);
                             // 메시지 리스트에 추가
                             messageList.add(chatMessage);// 변환된 DTO 출력
                         }
