@@ -32,7 +32,7 @@ public class UserController {
     @Operation(summary = "이메일 회원가입", description = "유저의 이메일을 이용해 회원가입을 시도한다.")
     @ApiResponse(responseCode = "200", description = "이메일 회원가입 성공")
     @PostMapping("/signup")
-    public ApiResponseEntity<?> signup(
+    public ApiResponseEntity<Void> signup(
             @RequestBody @Valid EmailSignUpRequest emailSignUpRequest, HttpServletResponse response) throws IOException {
 
         userService.signUp(emailSignUpRequest);
@@ -66,7 +66,7 @@ public class UserController {
     @Operation(summary = "생년월일 정보 입력", description = "유저의 생년월일 정보 입력을 시도한다.")
     @ApiResponse(responseCode = "200", description = "생년월일 입력 성공")
     @PostMapping("/birth")
-    public ApiResponseEntity<?> birth(@RequestBody @Valid BirthRequest birthRequest) {
+    public ApiResponseEntity<Void> birth(@RequestBody @Valid BirthRequest birthRequest) {
         userService.setBirthDate(birthRequest);
 
         return ApiResponseEntity.ok("생년월일 입력 성공", null);
@@ -75,7 +75,7 @@ public class UserController {
     @Operation(summary = "로그아웃", description = "로그아웃을 시도한다.")
     @ApiResponse(responseCode = "200", description = "로그아웃 성공")
     @PostMapping("/logout")
-    public ApiResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ApiResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         String logoutResult = userService.logout(request);
         Cookie refreshTokenCookie = new Cookie("refreshToken", null); // 값 설정 없이 null로 초기화
         refreshTokenCookie.setHttpOnly(true);
@@ -91,6 +91,16 @@ public class UserController {
         return ApiResponseEntity.ok(logoutResult, null);
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 시도한다.")
+    @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공")
+    @DeleteMapping("/withdraw")
+    public ApiResponseEntity<Void> withdrawUser(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
+        Long userId = userDetailsDTO.getId();
+        userService.withdrawUser(userId);
+
+        return ApiResponseEntity.ok("회원 탈퇴 성공", null);
+    }
+
     @Operation(summary = "회원 정보 불러오기", description = "유저의 기본 정보 조회를 시도한다.")
     @ApiResponse(responseCode = "200", description = "회원 정보 조회 성공")
     @GetMapping("/me")
@@ -104,7 +114,7 @@ public class UserController {
     @Operation(summary = "회원 정보 수정하기", description = "유저의 이름 및 비밀번호 수정을 시도한다.")
     @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공")
     @PutMapping("/me")
-    public ApiResponseEntity<?> updateUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestBody @Valid UserInfoRequest userInfoRequest) {
+    public ApiResponseEntity<Void> updateUserInfo(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestBody @Valid UserInfoRequest userInfoRequest) {
         Long userId = userDetailsDTO.getId();
         userService.updateUserInfo(userId, userInfoRequest);
 
