@@ -10,24 +10,25 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ChatMapper {
 
-    // ChatMessage 엔티티 -> ChatMessageDTO로 변환
+    // ChatMessage -> ChatMessageDTO
     @Mapping(source = "messageType", target = "messageType")
-    @Mapping(source = "chatroomId", target = "chatroomId")
+    @Mapping(source = "chatroom.chatroomId", target = "chatroomId")
     @Mapping(source = "senderId", target = "senderId")
     @Mapping(source = "content", target = "content")
     @Mapping(source = "accessor", target = "accessor")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     ChatMessageDTO toChatMessageDTO(ChatMessage message);
 
-    // ChatRoom 엔티티 -> ChatRoomDTO로 변환
+    // ChatRoom -> ChatRoomDTO
     @Mapping(source = "chatroomId", target = "chatroomId")
-    @Mapping(source = "userId", target = "userId")
-    @Mapping(source = "consultantId", target = "consultantId")
+    @Mapping(source = "user.userId", target = "userId")
+    @Mapping(source = "consultant.consultantId", target = "consultantId")
     @Mapping(source = "chatroomTitle", target = "chatroomTitle")
     @Mapping(source = "chatroomStatus", target = "chatroomStatus")
     @Mapping(source = "reservedTime", target = "reservedTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
@@ -36,33 +37,36 @@ public interface ChatMapper {
     @Mapping(source = "reservationInfo", target = "reservationInfo")
     ChatRoomDTO toChatRoomDTO(ChatRoom chatRoom);
 
-    // ChatMessageDTO -> ChatMessage 엔티티로 변환
+    // ChatMessageDTO -> ChatMessage
     @Mapping(source = "messageType", target = "messageType")
-    @Mapping(source = "chatroomId", target = "chatroomId")
+    @Mapping(source = "chatroomId", target = "chatroom.chatroomId")
     @Mapping(source = "senderId", target = "senderId")
     @Mapping(source = "content", target = "content")
     @Mapping(source = "accessor", target = "accessor")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     ChatMessage toChatMessage(ChatMessageDTO chatMessageDTO);
 
-    // ChatRoomDTO -> ChatRoom 엔티티로 변환
+    // ChatRoomDTO -> ChatRoom
     @Mapping(source = "chatroomId", target = "chatroomId")
-    @Mapping(source = "userId", target = "userId")
-    @Mapping(source = "consultantId", target = "consultantId")
+    @Mapping(source = "userId", target = "user.userId")
+    @Mapping(source = "consultantId", target = "consultant.consultantId")
     @Mapping(source = "chatroomTitle", target = "chatroomTitle")
     @Mapping(source = "chatroomStatus", target = "chatroomStatus")
     @Mapping(source = "reservedTime", target = "reservedTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(source = "finishedAt", target = "finishedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(source = "reservationInfo", target = "reservationInfo")
     ChatRoom toChatRoom(ChatRoomDTO chatRoomDTO);
 
+    // Custom mappers for JSON <-> Object conversion
     default List<ReservationInfoDTO> mapStringToReservationInfo(String reservationInfoJson) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(reservationInfoJson, objectMapper.getTypeFactory().constructCollectionType(List.class, ReservationInfoDTO.class));
+            return objectMapper.readValue(reservationInfoJson, objectMapper.getTypeFactory()
+                    .constructCollectionType(List.class, ReservationInfoDTO.class));
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -75,5 +79,4 @@ public interface ChatMapper {
             return null;
         }
     }
-
 }

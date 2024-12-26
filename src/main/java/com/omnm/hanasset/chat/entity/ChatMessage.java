@@ -17,11 +17,25 @@ import java.time.LocalDateTime;
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "chat_message_id", nullable = false)
     private Long chatMessageId;
-    private String chatroomId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chatroom_id", nullable = false)
+    private ChatRoom chatroom;
+
+    @Column(name = "sender_id", nullable = false)
     private Long senderId;
-    private String accessor; // 'guest' | 'consultant'
+
+    @Column(name = "accessor", length = 225)
+    private String accessor;
+
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    private String messageType; // 'talk' | 'join'
+
+    @Column(name = "message_type", length = 225)
+    private String messageType;
 }
