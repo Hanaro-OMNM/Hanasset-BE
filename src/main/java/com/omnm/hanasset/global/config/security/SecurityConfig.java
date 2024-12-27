@@ -35,14 +35,15 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize ->
                         authorize
+                                .requestMatchers("/real-estates/**").authenticated()
+                                //USER, GUEST 접근 가능 end point
                                 .requestMatchers("/").permitAll()
+                                .requestMatchers("/markers/**").permitAll()
                                 .requestMatchers("/users/signin/**").permitAll()
                                 .requestMatchers("/users/signup/**").permitAll()
                                 .requestMatchers("/users/birth/**").permitAll()
                                 .requestMatchers("/users/logout/**").permitAll()
                                 .requestMatchers("/users/me/**").authenticated()
-                                .requestMatchers("/markers/**").permitAll()
-                                .requestMatchers("/real-estates/**").permitAll()
                                 .requestMatchers("/users/bookmarks/**").authenticated()
                                 .requestMatchers("/consultant/signin/**").permitAll()
                                 .requestMatchers("/consultant/**").authenticated()
