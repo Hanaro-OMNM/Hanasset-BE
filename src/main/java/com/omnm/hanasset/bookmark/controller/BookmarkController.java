@@ -1,6 +1,7 @@
 package com.omnm.hanasset.bookmark.controller;
 
 import com.omnm.hanasset.bookmark.dto.BookmarkAreaCodesResponse;
+import com.omnm.hanasset.bookmark.dto.BookmarkAreaCodesStatusResponse;
 import com.omnm.hanasset.bookmark.dto.BookmarkRealEstatesResponse;
 import com.omnm.hanasset.bookmark.dto.BookmarkResponse;
 import com.omnm.hanasset.bookmark.service.BookmarkService;
@@ -65,6 +66,15 @@ public class BookmarkController {
         BookmarkAreaCodesResponse areaCodes = bookmarkService.getBookmarkAreaCodes(userDetailsDTO.getId());
         return ApiResponseEntity.ok("내 관심 지역 리스트 조회 성공", areaCodes);
     }
+
+    @Operation(summary = "지역 북마크 상태 조회", description = "내 관심 지역 상태를 조회한다.")
+    @ApiResponse(responseCode = "200", description = "내 관심 지역 상태 조회 성공")
+    @GetMapping("/area-codes/status")
+    public ApiResponseEntity<BookmarkAreaCodesStatusResponse> getBookmarkAreaCodesStatus(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
+        BookmarkAreaCodesStatusResponse areaCodes = bookmarkService.getBookmarkAreaCodesStatus(userDetailsDTO.getId());
+        return ApiResponseEntity.ok("내 관심 지역 상태 조회 성공", areaCodes);
+    }
+
 
     @Operation(summary = "지역 북마크 추가", description = "내 관심 지역 리스트를 추가한다.")
     @ApiResponse(responseCode = "200", description = "내 관심 지역 리스트 추가 성공")
