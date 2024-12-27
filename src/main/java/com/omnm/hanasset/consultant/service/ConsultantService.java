@@ -38,8 +38,8 @@ public class ConsultantService {
 
         List<String> tokensList = new ArrayList<>();
 
-        String accessToken = tokenProvider.generateAccessToken("CONSULTANT " + consultantSignInRequest.getConsultantLoginId());
-        String refreshToken = tokenProvider.generateRefreshToken("CONSULTANT " + consultantSignInRequest.getConsultantLoginId());
+        String accessToken = tokenProvider.generateAccessToken(consultantSignInRequest.getConsultantLoginId());
+        String refreshToken = tokenProvider.generateRefreshToken(consultantSignInRequest.getConsultantLoginId());
 
         tokensList.add(accessToken);
         tokensList.add(refreshToken);
