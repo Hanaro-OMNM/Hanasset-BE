@@ -25,7 +25,7 @@ public class RealEstateInfoResponse {
     private String addressDetail;
 
     @Schema(description = "매물 전세금 또는 보증금")
-    private Integer deposit;
+    private Long deposit;
 
     @Schema(description = "매물의 타입 전용 면적")
     private Double exclusiveAreaSize;

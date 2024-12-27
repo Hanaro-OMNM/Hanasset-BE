@@ -32,6 +32,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
                                   @Param("isHousingFraud") Boolean isHousingFraud,
                                   @Param("exclusiveArea") Integer exclusiveArea,
                                   @Param("rentType") String rentType,
-                                  @Param("deposit") Integer deposit,
-                                  @Param("price") Integer price);
+                                  @Param("deposit") Long deposit,
+                                  @Param("price") Long price);
 }

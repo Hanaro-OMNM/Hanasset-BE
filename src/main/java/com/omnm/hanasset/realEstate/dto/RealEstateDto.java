@@ -35,10 +35,10 @@ public class RealEstateDto {
     private Integer floor;
 
     @Schema(description = "매물 전세금 또는 보증금")
-    private Integer deposit;
+    private Long deposit;
 
     @Schema(description = "매물 월세")
-    private Integer price;
+    private Long price;
 
     @Schema(description = "매물 설명")
     private String description;
