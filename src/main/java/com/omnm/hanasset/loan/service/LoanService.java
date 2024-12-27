@@ -50,7 +50,7 @@ public class LoanService {
 
     public LoanResponse getConsultingRecommendLoans(Long userId, String chatroomId) {
         List<ConsultingItem> consultingItems = consultingItemRepository.findAllByChatroom_ChatroomId(chatroomId);
-        List<Long> realEstateIds = consultingItems.stream().map(consultingItem -> consultingItem.getRealEstate().getBookmarkRealEstateId()).toList();
+        List<Long> realEstateIds = consultingItems.stream().map(consultingItem -> consultingItem.getRealEstate().getRealEstateId()).toList();
         return getRecommendLoans(userId, realEstateIds);
     }
 
