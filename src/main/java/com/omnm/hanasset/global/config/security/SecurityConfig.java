@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 .requestMatchers("/users/logout/**").permitAll()
                                 .requestMatchers("/users/me/**").authenticated()
                                 .requestMatchers("/users/property/**").authenticated()
+                                .requestMatchers("/loan/**").authenticated()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/ws-chat/**").permitAll()
                                 .requestMatchers("/markers/**").permitAll()
