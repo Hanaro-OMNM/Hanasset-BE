@@ -11,7 +11,12 @@ import java.time.LocalDate;
 @Getter
 @Builder
 public class UserInfoResponse {
+    @Schema(description = "손님 이름", example = "변우석")
     private String name;
+
+    @Schema(description = "손님 이메일", example = "test@example.com")
     private String email;
+
+    @Schema(description = "손님 생년월일", example = "1991-10-31")
     private LocalDate birthDate;
 }
