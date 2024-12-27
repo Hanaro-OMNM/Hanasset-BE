@@ -68,17 +68,17 @@ public class BookmarkController {
 
     @Operation(summary = "지역 북마크 추가", description = "내 관심 지역 리스트를 추가한다.")
     @ApiResponse(responseCode = "200", description = "내 관심 지역 리스트 추가 성공")
-    @PostMapping("/area-codes/{areaCodeId}")
-    public ApiResponseEntity<Void> addBookmarkAreaCode(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @PathVariable Long areaCodeId) {
-        bookmarkService.addBookmarkAreaCode(userDetailsDTO.getId(), areaCodeId);
+    @PostMapping("/area-codes/{codeId}")
+    public ApiResponseEntity<Void> addBookmarkAreaCode(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @PathVariable Long codeId) {
+        bookmarkService.addBookmarkAreaCode(userDetailsDTO.getId(), codeId);
         return ApiResponseEntity.ok("내 관심 지역 북마크 추가 성공", null);
     }
 
     @Operation(summary = "지역 북마크 삭제", description = "내 관심 지역 리스트를 삭제한다.")
     @ApiResponse(responseCode = "200", description = "내 관심 지역 리스트 삭제 성공")
-    @DeleteMapping("/area-codes/{areaCodeId}")
-    public ApiResponseEntity<Void> deleteBookmarkAreaCode(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @PathVariable Long areaCodeId) {
-        bookmarkService.deleteBookmarkAreaCode(userDetailsDTO.getId(), areaCodeId);
+    @DeleteMapping("/area-codes/{codeId}")
+    public ApiResponseEntity<Void> deleteBookmarkAreaCode(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @PathVariable Long codeId) {
+        bookmarkService.deleteBookmarkAreaCode(userDetailsDTO.getId(), codeId);
         return ApiResponseEntity.ok("내 관심 지역 북마크 삭제 성공", null);
     }
 }

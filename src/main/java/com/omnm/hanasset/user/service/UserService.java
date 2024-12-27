@@ -93,6 +93,15 @@ public class UserService {
     }
 
     @Transactional
+    public void withdrawUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Property property = propertyRepository.findByUser_UserId(userId).orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
+
+        propertyRepository.delete(property);
+        userRepository.delete(user);
+    }
+
+    @Transactional
     public UserInfoResponse getUserInfo(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 

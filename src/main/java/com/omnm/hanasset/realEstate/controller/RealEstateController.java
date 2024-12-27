@@ -1,12 +1,14 @@
 package com.omnm.hanasset.realEstate.controller;
 
 import com.omnm.hanasset.global.common.ApiResponseEntity;
+import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.realEstate.dto.*;
 import com.omnm.hanasset.realEstate.service.RealEstateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,16 +23,16 @@ public class RealEstateController {
     @Operation(summary = "매물 리스트 조회", description = "해당 단지의 매물 리스트를 조회한다.")
     @ApiResponse(responseCode = "200", description = "매물 리스트 조회 성공")
     @GetMapping
-    public ApiResponseEntity<RealEstatesResponse> getRealEstates(@RequestParam Long housingComplexId) {
-        RealEstatesResponse realEstates = realEstateService.getRealEstates(housingComplexId);
+    public ApiResponseEntity<RealEstatesResponse> getRealEstates(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestParam Long housingComplexId) {
+        RealEstatesResponse realEstates = realEstateService.getRealEstates(userDetailsDTO, housingComplexId);
         return ApiResponseEntity.ok("매물 리스트 조회 성공",realEstates);
     }
 
     @Operation(summary= "최근에 확인한 매물 리스트 조회", description = "사용자가 최근에 확인한 매물 리스트를 조회한다.")
     @ApiResponse(responseCode = "200", description = "최근 확인 매물 리스트 조회 성공")
     @GetMapping("/recent-visited-list")
-    public ApiResponseEntity<RealEstatesResponse> getRecentVisitedRealEstates(@RequestParam List<Long> realEstatesIds) {
-        RealEstatesResponse recentVisitedRealEstates = realEstateService.getRecentVisitedRealEstates(realEstatesIds);
+    public ApiResponseEntity<RealEstatesResponse> getRecentVisitedRealEstates(@AuthenticationPrincipal UserDetailsDTO userDetailsDTO, @RequestParam List<Long> realEstatesIds) {
+        RealEstatesResponse recentVisitedRealEstates = realEstateService.getRecentVisitedRealEstates(userDetailsDTO, realEstatesIds);
         return ApiResponseEntity.ok("최근 확인 매물 리스트 조회 성공", recentVisitedRealEstates);
     }
 

@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -184,7 +183,6 @@ public class ChatRoomController {
 
     @Operation(summary = "특정 채팅방 메시지 조회", description = "특정 채팅방의 메시지 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "메시지 조회 성공")
-    // API 2: Get messages for a specific chatroom
     @GetMapping("/{chatroomId}/messages")
     public ApiResponseEntity<ChatMessageResponse> getMessagesByChatroomId(@PathVariable String chatroomId) {
         ChatMessageResponse response = chatRoomService.getMessagesByChatroomId(chatroomId);

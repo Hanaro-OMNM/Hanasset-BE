@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
 @Service
 public class ChatRoomService {
 
-    @Autowired
-    private ChatMapper chatMapper;  // ChatMapper 주입
+
+    private final ChatMapper chatMapper;  // ChatMapper 주입
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
@@ -69,7 +69,7 @@ public class ChatRoomService {
 
     public ChatroomResponse createRoom(Long userId, Long consultantId, String chatroomTitle, LocalDateTime reservedTime,  List<ReservationInfoDTO> reservationInfo) {
         String reservationInfoJson = convertReservationInfoToJson(reservationInfo);
-
+        System.out.printf(String.valueOf(userId), consultantId,chatroomTitle,reservedTime);
         // Find the User and Consultant entities by their IDs
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
@@ -108,13 +108,17 @@ public class ChatRoomService {
         }
 
         ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(savedChatRoom);
+        // 채팅방 ID 기반 Stream Key 생성
         String streamKey = "stream_" + chatRoomDTO.getChatroomId();
         String groupName = "group_" + chatRoomDTO.getChatroomId();
+        String groupTestName = "group_test_" + chatRoomDTO.getChatroomId();
+
 
         try {
             String json = objectMapper.writeValueAsString(chatRoomDTO);
             redisStreamTemplate.opsForStream().add(streamKey, Collections.singletonMap("chatRoom", json));
             createConsumerGroup(streamKey, groupName);
+            createConsumerGroup(streamKey, groupTestName);
             log.info("Chat room information published to stream '{}': {}", streamKey, json);
         } catch (Exception e) {
             log.error("Error while publishing chat room information to stream '{}': {}", streamKey, e.getMessage(), e);
