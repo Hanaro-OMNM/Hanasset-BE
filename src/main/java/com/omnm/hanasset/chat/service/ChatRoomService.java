@@ -27,6 +27,7 @@ import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 
@@ -343,19 +344,23 @@ public class ChatRoomService {
             throw new IllegalArgumentException("Invalid state transition: " + currentState + " to " + newState);
         }
 
+        String streamKey = "stream_" + chatroomId;
+
         int rowsUpdated = chatRoomRepository.updateStatusAndFinishedAt(chatroomId, currentState, newState);
 
         if (rowsUpdated == 0) {
             ChatRoom existingChatRoom = fetchAndValidateChatRoom(chatroomId, currentState, newState);
             ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(existingChatRoom);
+            redisStreamTemplate.expire(streamKey, 1, TimeUnit.HOURS);
             return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
         }
 
         ChatRoom updatedChatRoom = chatRoomRepository.findByChatroomId(chatroomId)
                 .orElseThrow(() -> new RuntimeException("Failed to fetch updated ChatroomId for userId: " + chatroomId));
 
-
+        redisStreamTemplate.expire(streamKey, 1, TimeUnit.HOURS);
         ChatRoomDTO chatRoomDTO = chatMapper.toChatRoomDTO(updatedChatRoom);
+
         return new ChatroomResponse(1, Collections.singletonList(chatRoomDTO));
     }
 
