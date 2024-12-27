@@ -7,6 +7,7 @@ import com.omnm.hanasset.user.dto.*;
 import com.omnm.hanasset.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,10 @@ public class UserController {
     private final UserService userService;
 
     @Operation(summary = "이메일 회원가입", description = "유저의 이메일을 이용해 회원가입을 시도한다.")
-    @ApiResponse(responseCode = "200", description = "이메일 회원가입 성공")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "이메일 회원가입 성공"),
+            @ApiResponse(responseCode = "400", description = "이미 회원가입된 이메일입니다.")
+    })
     @PostMapping("/signup")
     public ApiResponseEntity<Void> signup(
             @RequestBody @Valid EmailSignUpRequest emailSignUpRequest, HttpServletResponse response) throws IOException {
@@ -41,7 +45,11 @@ public class UserController {
     }
 
     @Operation(summary = "일반 로그인", description = "유저의 이메일을 이용해 로그인을 시도한다.")
-    @ApiResponse(responseCode = "200", description = "일반 로그인 성공")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "일반 로그인 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저입니다."),
+            @ApiResponse(responseCode = "400", description = "비밀번호가 틀립니다.")
+    })
     @PostMapping("/signin")
     public ResponseEntity<UserResponse<?>> signin(
         @RequestBody @Valid EmailSignInRequest emailSignInRequest, HttpServletResponse response

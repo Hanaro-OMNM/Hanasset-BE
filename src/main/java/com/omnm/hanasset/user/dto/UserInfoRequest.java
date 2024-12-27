@@ -12,7 +12,7 @@ import lombok.*;
 @Setter
 @Builder
 public class UserInfoRequest {
-    @Schema(description = "변경하려는 이름", example = "이악수")
+    @Schema(description = "변경하려는 이름", example = "유연석")
     @NotBlank(message = "이름을 입력해 주세요.")
     private String name;
 
