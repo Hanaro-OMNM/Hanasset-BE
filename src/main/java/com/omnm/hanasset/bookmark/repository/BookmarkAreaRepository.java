@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface BookmarkAreaRepository extends JpaRepository<BookmarkArea, Long> {
     List<BookmarkArea> findByUser_UserId(Long userId);
-    void deleteByUser_UserIdAndAreaCode_AreaCodeId(Long userId, Long areaCodeId);
+    void deleteByUser_UserIdAndAreaCode_Code(Long userId, Long codeId);
 }
