@@ -1,5 +1,6 @@
 package com.omnm.hanasset.realEstate.service;
 
+import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.realEstate.dto.*;
@@ -20,11 +21,12 @@ public class RealEstateService {
     private final RealEstateRepository realEstateRepository;
     private final RealEstateMapper realEstateMapper;
 
-    public RealEstatesResponse getRealEstates(Long housingComplexId) {
+    public RealEstatesResponse getRealEstates(UserDetailsDTO userDetailsDTO, Long housingComplexId) {
         List<RealEstate> realEstates = realEstateRepository.findByHousingType_HousingComplex_HousingComplexId(housingComplexId);
-        List<RealEstateDto> realEstateDtoList = realEstates.stream()
-                .map(realEstateMapper::toRealEstateDto)
+        List<RealEstateBookmarkDto> realEstateDtoList = realEstates.stream()
+                .map(realEstate -> realEstateMapper.toRealEstateBookmarkDto(realEstate, isBookmarked(userDetailsDTO, realEstate)))
                 .collect(Collectors.toList());
+
         return RealEstatesResponse.builder()
                 .count(realEstateDtoList.size())
                 .realEstates(realEstateDtoList)
@@ -55,14 +57,23 @@ public class RealEstateService {
         return realEstateMapper.toRealEstateDetailResponse(realEstate);
     }
 
-    public RealEstatesResponse getRecentVisitedRealEstates(List<Long> realEstateIds) {
+    public RealEstatesResponse getRecentVisitedRealEstates(UserDetailsDTO userDetailsDTO, List<Long> realEstateIds) {
         List<RealEstate> realEstates = realEstateRepository.findByRealEstateIdIn(realEstateIds);
-        List<RealEstateDto> realEstateDtoList = realEstates.stream()
-                .map(realEstateMapper::toRealEstateDto)
+        List<RealEstateBookmarkDto> realEstateDtoList = realEstates.stream()
+                .map(realEstate -> realEstateMapper.toRealEstateBookmarkDto(realEstate, isBookmarked(userDetailsDTO, realEstate)))
                 .collect(Collectors.toList());
+
         return RealEstatesResponse.builder()
                 .count(realEstateDtoList.size())
                 .realEstates(realEstateDtoList)
                 .build();
+    }
+
+    private Boolean isBookmarked(UserDetailsDTO userDetailsDTO, RealEstate realEstate) {
+        if (userDetailsDTO.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_GUEST"))) {
+            return false;
+        }
+        return realEstate.getBookmarkRealEstates().stream()
+                .anyMatch(bookmarkRealEstate -> bookmarkRealEstate.getUser().getUserId().equals(userDetailsDTO.getId()));
     }
 }
