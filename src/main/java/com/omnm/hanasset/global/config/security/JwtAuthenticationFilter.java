@@ -128,10 +128,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(tokenProvider.getUserAuthentication(token));
     }
 
-    private void setConsultantAuthentication(String token) {
-        SecurityContextHolder.getContext().setAuthentication(tokenProvider.getConsultantAuthentication(token));
-    }
-
     // 토큰 관련 예외 처리
     private void handleInvalidToken(HttpServletRequest request, HttpServletResponse response, ErrorCode errorCode) throws IOException {
 
