@@ -1,9 +1,8 @@
-package com.omnm.hanasset.user.service;
+package com.omnm.hanasset.global.config.security;
 
 import com.omnm.hanasset.consultant.entity.Consultant;
 import com.omnm.hanasset.consultant.repository.ConsultantRepository;
 import com.omnm.hanasset.global.dto.UserDetailsDTO;
-import com.omnm.hanasset.global.dto.ConsultantDetailsDTO;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +32,9 @@ public class UserAuthenticationService implements UserDetailsService {
         if (!user.isPresent()) {
             Consultant consultant = consultantRepository.findByconsultantLoginId(email).orElseThrow(() -> new UsernameNotFoundException(email));
 
-            return ConsultantDetailsDTO.builder()
-                    .loginId(consultant.getConsultantLoginId())
+            return UserDetailsDTO.builder()
+                    .id(consultant.getConsultantId())
+                    .email(consultant.getConsultantLoginId()) // 상담사는 이메일 아니고 consultant_login_id
                     .password(consultant.getPassword())
                     .authority(new SimpleGrantedAuthority("ROLE_CONSULTANT")) // 기본 권한 설정
                     .build();

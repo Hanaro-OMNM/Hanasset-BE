@@ -1,6 +1,6 @@
 package com.omnm.hanasset.consultant.controller;
 
-import com.omnm.hanasset.global.dto.ConsultantDetailsDTO;
+import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.consultant.dto.ConsultantInfoResponse;
 import com.omnm.hanasset.consultant.dto.ConsultantResponse;
 import com.omnm.hanasset.consultant.dto.ConsultantSignInRequest;
@@ -54,8 +54,8 @@ public class ConsultantController {
     @Operation(summary = "상담사 정보 조회", description = "상담사의 DB Id와 상담사의 이름을 조회한다.")
     @ApiResponse(responseCode = "200", description = "상담사 정보 조회 성공")
     @GetMapping
-    public ApiResponseEntity<ConsultantInfoResponse> getConsultantInfo (@AuthenticationPrincipal ConsultantDetailsDTO consultantDetailsDTO) {
-        ConsultantInfoResponse consultantInfoResponse = consultantService.getConsultantInfo(consultantDetailsDTO.getUsername());
+    public ApiResponseEntity<ConsultantInfoResponse> getConsultantInfo (@AuthenticationPrincipal UserDetailsDTO userDetailsDTO) {
+        ConsultantInfoResponse consultantInfoResponse = consultantService.getConsultantInfo(userDetailsDTO.getId());
 
         return ApiResponseEntity.ok("상담사 정보 조회 성공", consultantInfoResponse);
     }

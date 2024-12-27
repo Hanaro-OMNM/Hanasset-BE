@@ -2,7 +2,6 @@ package com.omnm.hanasset.global.config.security;
 
 import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.user.service.GuestAuthenticationService;
-import com.omnm.hanasset.user.service.UserAuthenticationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

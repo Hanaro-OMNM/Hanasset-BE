@@ -48,8 +48,8 @@ public class ConsultantService {
     }
 
     @Transactional
-    public ConsultantInfoResponse getConsultantInfo(String consultantLoginId) {
-        Consultant consultant = consultantRepository.findByconsultantLoginId(consultantLoginId).orElseThrow(() -> new CustomException(ErrorCode.CONSULTANT_NOT_FOUND));
+    public ConsultantInfoResponse getConsultantInfo(Long consultantId) {
+        Consultant consultant = consultantRepository.findById(consultantId).orElseThrow(() -> new CustomException(ErrorCode.CONSULTANT_NOT_FOUND));
 
         return ConsultantInfoResponse.builder()
                 .consultantId(consultant.getConsultantId())
