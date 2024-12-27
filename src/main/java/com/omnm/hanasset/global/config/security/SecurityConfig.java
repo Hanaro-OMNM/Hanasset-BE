@@ -44,6 +44,8 @@ public class SecurityConfig {
                                 .requestMatchers("/users/withdraw/**").authenticated()
                                 .requestMatchers("/users/me/**").authenticated()
                                 .requestMatchers("/users/property/**").authenticated()
+                                .requestMatchers("/consultant/signin/**").permitAll()
+                                .requestMatchers("/consultant/logout/**").permitAll()
                                 .requestMatchers("/loan/**").authenticated()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/ws-chat/**").permitAll()
