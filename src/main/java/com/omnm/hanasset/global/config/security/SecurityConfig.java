@@ -38,8 +38,8 @@ public class SecurityConfig {
                         authorize
                                 .requestMatchers("/real-estates/**").authenticated()
                                 //USER, GUEST 접근 가능 end point
-                                .requestMatchers("/").permitAll()
                                 .requestMatchers("/markers/**").permitAll()
+                                .requestMatchers("/").permitAll()
                                 .requestMatchers("/users/signin/**").permitAll()
                                 .requestMatchers("/users/signup/**").permitAll()
                                 .requestMatchers("/users/birth/**").permitAll()
@@ -47,12 +47,10 @@ public class SecurityConfig {
                                 .requestMatchers("/users/withdraw/**").authenticated()
                                 .requestMatchers("/users/me/**").authenticated()
                                 .requestMatchers("/users/property/**").authenticated()
+                                .requestMatchers("/users/bookmarks/**").authenticated()
                                 .requestMatchers("/loan/**").authenticated()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/ws-chat/**").permitAll()
-                                .requestMatchers("/markers/**").permitAll()
-                                .requestMatchers("/real-estates/**").permitAll()
-                                .requestMatchers("/users/bookmarks/**").authenticated()
                                 .requestMatchers("/consultant/signin/**").permitAll()
                                 .requestMatchers("/consultant/**").authenticated()
                                 .requestMatchers("/swagger", "/swagger-ui.html").permitAll()
