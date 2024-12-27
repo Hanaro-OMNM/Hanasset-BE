@@ -11,8 +11,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AreaCodeRepository extends JpaRepository<AreaCode, Long> {
+    Optional<AreaCode> findByCode(Long code);
 
     @Query("""
     SELECT new com.omnm.hanasset.marker.dto.ShowAreaCodeDTO(co.address, co.code, co.coordinate)

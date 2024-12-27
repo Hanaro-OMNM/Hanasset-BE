@@ -65,7 +65,7 @@ public class BookmarkService {
 
         List<AreaCodeDto> areaCodeDtos = bookmarks.stream()
                 .map(bookmark -> AreaCodeDto.builder()
-                        .areaCodeId(bookmark.getAreaCode().getAreaCodeId())
+                        .codeId(bookmark.getAreaCode().getCode())
                         .emdName(bookmark.getAreaCode().getEmdName())
                         .centerLat(bookmark.getAreaCode().getCoordinate().getY())
                         .centerLng(bookmark.getAreaCode().getCoordinate().getX())
@@ -78,19 +78,19 @@ public class BookmarkService {
     }
 
     @Transactional
-    public void addBookmarkAreaCode(Long userId, Long areaCodeId) {
+    public void addBookmarkAreaCode(Long userId, Long codeId) {
         //TODO: 추가할 지역 코드가 기존에 북마크한 지역 코드인지 확인 및 예외처리
         BookmarkArea bookmark = BookmarkArea.builder()
                 .user(userRepository.findById(userId).orElseThrow())
-                .areaCode(areaCodeRepository.findById(areaCodeId).orElseThrow())
+                .areaCode(areaCodeRepository.findByCode(codeId).orElseThrow())
                 .build();
 
         bookmarkAreaRepository.save(bookmark);
     }
 
     @Transactional
-    public void deleteBookmarkAreaCode(Long userId, Long areaCodeId) {
+    public void deleteBookmarkAreaCode(Long userId, Long codeId) {
         //TODO: 삭제할 지역 코드가 기존에 북마크한 지역 코드인지 확인 및 예외처리
-        bookmarkAreaRepository.deleteByUser_UserIdAndAreaCode_AreaCodeId(userId, areaCodeId);
+        bookmarkAreaRepository.deleteByUser_UserIdAndAreaCode_Code(userId, codeId);
     }
 }
