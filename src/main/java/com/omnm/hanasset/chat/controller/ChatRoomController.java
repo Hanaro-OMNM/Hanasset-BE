@@ -8,7 +8,10 @@ import com.omnm.hanasset.chat.entity.ChatRoom;
 import com.omnm.hanasset.chat.repository.ChatRoomRepository;
 import com.omnm.hanasset.chat.service.ChatRoomService;
 import com.omnm.hanasset.chat.utils.ChatMapper;
+import com.omnm.hanasset.consultant.entity.Consultant;
+import com.omnm.hanasset.consultant.repository.ConsultantRepository;
 import com.omnm.hanasset.global.common.ApiResponseEntity;
+import com.omnm.hanasset.global.dto.ConsultantDetailsDTO;
 import com.omnm.hanasset.global.dto.UserDetailsDTO;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Tag(name = "채팅룸 관리", description = "채팅룸 관련 API 목록")
@@ -33,6 +37,7 @@ public class ChatRoomController {
     private final ChatRoomRepository chatRoomRepository;
     private final RedisTemplate<String, Object> redisStreamTemplate;
     private final ChatMapper chatMapper;
+    private final ConsultantRepository consultantRepository;
 
     @Operation(summary = "모든 채팅방 조회", description = "전체 채팅방 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "채팅방 목록 조회 성공")
@@ -63,8 +68,13 @@ public class ChatRoomController {
 
     @Operation(summary = "대기방 조회", description = "특정 상담사의 대기방 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "대기방 조회 성공")
-    @GetMapping("/waiting/{consultantId}")
-    public ApiResponseEntity<WaitingRoomResponse> getWaitingRooms(@PathVariable Long consultantId) {
+    @GetMapping("/waiting")
+    public ApiResponseEntity<WaitingRoomResponse> getWaitingRooms(@AuthenticationPrincipal ConsultantDetailsDTO consultantDetailsDTO) {
+        Long consultantId = consultantRepository
+                .findByconsultantLoginId(consultantDetailsDTO.getLoginId())
+                .map(Consultant::getConsultantId)
+                .orElse(-1L); // 값이 없으면 -1 반환
+
         WaitingRoomResponse response = chatRoomService.getWaitingRooms(consultantId);
         return ApiResponseEntity.ok("대기방 조회 성공", response);
     }
@@ -72,8 +82,12 @@ public class ChatRoomController {
     // 상담사 대기 목록에 채팅방 추가 API
     @Operation(summary = "대기방 생성", description = "특정 상담사의 대기방 목록을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "대기방 생성 성공")
-    @PostMapping("/add-waiting/{consultantId}")
-    public ApiResponseEntity<Object> addWaitingRooms(@PathVariable Long consultantId) {
+    @PostMapping("/add-waiting")
+    public ApiResponseEntity<Object> addWaitingRooms(@AuthenticationPrincipal ConsultantDetailsDTO consultantDetailsDTO) {
+        Long consultantId = consultantRepository
+                .findByconsultantLoginId(consultantDetailsDTO.getLoginId())
+                .map(Consultant::getConsultantId)
+                .orElse(-1L); // 값이 없으면 -1 반환
         try {
             // 대기 목록에 채팅방 추가
             chatRoomService.addWaitingRoomToStream(consultantId);
@@ -124,7 +138,6 @@ public class ChatRoomController {
             String chatroomId = request.get("chatroomId");
             String currentState = request.get("state");
 
-            // Determine the next state
             String newState = determineNextState(currentState);
 
             if (newState == null) {
@@ -132,9 +145,6 @@ public class ChatRoomController {
                         .withMessage("Invalid state: " + currentState);
             }
 
-            int rowsUpdated = chatRoomRepository.updateStatusByChatroomId(chatroomId, currentState, newState);
-
-            // Call appropriate service method based on state transition
             ChatroomResponse response;
             if ("active".equals(currentState) && "completed".equals(newState)) {
                 response = chatRoomService.updateActiveToCompleted(chatroomId, currentState, newState);
@@ -161,15 +171,6 @@ public class ChatRoomController {
             return "completed";
         }
         return null;
-    }
-
-    // Redis에 상태를 저장하는 유틸리티 메서드
-    private boolean setChatRoomStatusInRedis(String chatroomId, String status) {
-        final String key = "stream_" + chatroomId;
-        final ValueOperations<String, Object> valueOperations = redisStreamTemplate.opsForValue();
-
-        valueOperations.set(key, status);
-        return redisStreamTemplate.expire(key, 1, TimeUnit.HOURS);
     }
 
     @Operation(summary = "완료된 채팅방 조회", description = "특정 사용자의 완료된 채팅방 목록을 조회합니다.")
