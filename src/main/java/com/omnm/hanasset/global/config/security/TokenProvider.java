@@ -132,10 +132,11 @@ public class TokenProvider {
     public void destroyToken(String accessToken, String refreshToken) {
         Claims claims = parseClaims(accessToken);
         Long expiration = calculateRemainingTime(claims.getExpiration());
-
+        
+        if (expiration>0) {
+            redisHandler.setValueOperations(accessToken, "logout", Duration.ofMillis(expiration));
+        }
         redisHandler.deleteByKey(refreshToken);
-
-        redisHandler.setValueOperations(accessToken, "logout", Duration.ofMillis(expiration));
     }
 
     // 토큰의 남은 시간 가져오기
