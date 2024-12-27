@@ -32,11 +32,8 @@ public class ChatController {
      */
     @MessageMapping("/chat.sendMessage/{roomId}")
     @SendTo("/topic/rooms/{roomId}")
-    public ChatMessage sendMessage(@DestinationVariable String roomId, ChatMessage message) {
-        // ChatMessage를 ChatMessageDTO로 변환
-        ChatMessageDTO chatMessageDTO = chatMapper.toChatMessageDTO(message);
-        publisher.publishMessage(roomId, chatMessageDTO);
-        // 메시지 처리 로직
+    public ChatMessageDTO sendMessage(@DestinationVariable String roomId, ChatMessageDTO message) {
+        publisher.publishMessage(roomId, message);
         return message;
     }
 
