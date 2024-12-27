@@ -1,6 +1,5 @@
 package com.omnm.hanasset.loan.controller;
 
-import com.omnm.hanasset.chat.service.ChatRoomService;
 import com.omnm.hanasset.global.common.ApiResponseEntity;
 import com.omnm.hanasset.global.dto.ConsultantDetailsDTO;
 import com.omnm.hanasset.global.dto.UserDetailsDTO;
@@ -34,7 +33,7 @@ public class LoanController {
     @Operation(summary = "상담 시 상담원이 요청한 손님 및 추천 대출 정보", description = "손님 정보와 등록한 매물 정보로 상담 시 추천 대출 상품 목록을 보여준다.")
     @ApiResponse(responseCode = "200", description = "상담 시 대출 상품 추천 성공")
     @GetMapping("/consultant")
-    public ApiResponseEntity<LoanResponse> getConsultingRecommendLoansByConsultant(@AuthenticationPrincipal ConsultantDetailsDTO consultantDetailsDTO, @RequestParam String chatroomId, @RequestParam Long userId) {
+    public ApiResponseEntity<LoanResponse> getConsultingRecommendLoansByConsultant(@RequestParam String chatroomId, @RequestParam Long userId) {
         LoanResponse recommendLoans = loanService.getConsultingRecommendLoans(userId, chatroomId);
         return ApiResponseEntity.ok("상담 손님 정보 조회 성공", recommendLoans);
     }
