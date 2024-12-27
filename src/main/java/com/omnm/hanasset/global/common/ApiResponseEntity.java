@@ -18,4 +18,8 @@ public record ApiResponseEntity<T>(
         return new ApiResponseEntity<>(errorCode.getHttpStatus(), errorCode.getMessage(), null);
     }
 
+    public ApiResponseEntity<T> withMessage(String message) {
+        return new ApiResponseEntity<>(this.httpStatus, message, this.result);
+    }
+
 }

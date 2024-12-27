@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AreaCodeDto {
 
-    @Schema(description = "지역 ID")
-    private Long areaCodeId;
+    @Schema(description = "법정동코드")
+    private Long codeId;
 
     @Schema(description = "지역 이름")
     private String emdName;

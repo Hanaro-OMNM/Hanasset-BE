@@ -23,8 +23,15 @@ public enum ErrorCode {
     ALREADY_REGISTERED_EMAIL(HttpStatus.BAD_REQUEST, "이미 회원가입된 이메일입니다."),
     INCORRECT_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 틀립니다."),
 
+    // Loan ErrorCode
+    LOAN_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 대출 상품이 존재하지 않습니다."),
+
     // RealEstate ErrorCode
     REAL_ESTATE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 부동산이 존재하지 않습니다."),
+
+
+    // Property ErrorCode
+    PROPERTY_NOT_FOUND(HttpStatus.NOT_FOUND, "자산 정보가 존재하지 않습니다."),
 
     // Consultant ErrorCode
     CONSULTANT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상담사가 존재하지 않습니다.");
