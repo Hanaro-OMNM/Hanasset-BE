@@ -2,7 +2,6 @@ package com.omnm.hanasset.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnm.hanasset.bookmark.repository.BookmarkRealEstateRepository;
 import com.omnm.hanasset.chat.dto.*;
 import com.omnm.hanasset.chat.entity.ChatMessage;
 import com.omnm.hanasset.chat.entity.ChatRoom;
@@ -16,19 +15,17 @@ import com.omnm.hanasset.consultant.entity.Consultant;
 import com.omnm.hanasset.consultant.repository.ConsultantRepository;
 import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
+import com.omnm.hanasset.realEstate.repository.RealEstateRepository;
 import com.omnm.hanasset.user.entity.User;
 import com.omnm.hanasset.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -55,7 +52,7 @@ public class ChatRoomService {
     private final ConsultingItemRepository consultingItemRepository;
     private final UserRepository userRepository;
     private final ConsultantRepository consultantRepository;
-    private final BookmarkRealEstateRepository bookmarkRealEstateRepository;
+    private final RealEstateRepository realEstateRepository;
 
     public ChatroomResponse findAll() {
         List<ChatRoom> allChatrooms = chatRoomRepository.findAll();
@@ -100,8 +97,7 @@ public class ChatRoomService {
 
                 ConsultingItem consultingItem = ConsultingItem.builder()
                         .chatroom(savedChatRoom) // ChatRoom 객체를 직접 설정
-                        .realEstate(bookmarkRealEstateRepository.findById(realEstateId)
-                                .orElseThrow(() -> new IllegalArgumentException("RealEstate not found with ID: " + realEstateId)))
+                        .realEstate(realEstateRepository.findById(realEstateId).orElseThrow(() -> new CustomException(ErrorCode.REAL_ESTATE_NOT_FOUND)))
                         .build();
                 consultingItemRepository.save(consultingItem);
             }
