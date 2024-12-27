@@ -19,5 +19,5 @@ public class RealEstatesResponse {
     private Integer count;
 
     @Schema(description = "매물 리스트")
-    private List<RealEstateDto> realEstates;
+    private List<RealEstateBookmarkDto> realEstates;
 }

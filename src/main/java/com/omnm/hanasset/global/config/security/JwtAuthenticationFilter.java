@@ -15,6 +15,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -25,23 +27,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
     private final RedisHandler redisHandler;
 
+    private static final String ERROR_CODE_ATTRIBUTE = "errorCode";
+
+    private static final List<String> URI_PREFIXES = Arrays.asList("/real-estates");
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String accessToken = tokenProvider.resolveTokenFromRequest(request); // request 헤더에서 토큰 가져오기
-            String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request); // request 쿠키에서 토큰 가져오기
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if (shouldFilter(request.getRequestURI())) {
+            try {
+                String accessToken = tokenProvider.resolveTokenFromRequest(request); // request 헤더에서 토큰 가져오기
+                String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request); // request 쿠키에서 토큰 가져오기
 
-            if (StringUtils.hasText(accessToken)) {
-                handleAccessToken(accessToken, refreshToken, request, response);
-            } else if (StringUtils.hasText(refreshToken)) {
-                handleRefreshToken(refreshToken, request, response);
+                if (StringUtils.hasText(accessToken)) {
+                    handleAccessToken(accessToken, refreshToken, request, response);
+                } else if (StringUtils.hasText(refreshToken)) {
+                    handleRefreshToken(refreshToken, request, response);
+                } else {
+                    SecurityContextHolder.getContext().setAuthentication(tokenProvider.getGuestAuthentication());
+                }
+                filterChain.doFilter(request, response); // 다음 필터로 넘어가기
+            } catch (Exception e) {
+                handleInvalidToken(request, response, ErrorCode.AUTHORIZATION_FAILED);
             }
+        } else {
+            try {
+                String accessToken = tokenProvider.resolveTokenFromRequest(request); // request 헤더에서 토큰 가져오기
+                String refreshToken = tokenProvider.resolveRefreshTokenFromCookie(request); // request 쿠키에서 토큰 가져오기
 
-            filterChain.doFilter(request, response); // 다음 필터로 넘어가기
+                if (StringUtils.hasText(accessToken)) {
+                    handleAccessToken(accessToken, refreshToken, request, response);
+                } else if (StringUtils.hasText(refreshToken)) {
+                    handleRefreshToken(refreshToken, request, response);
+                }
 
-        } catch (Exception e) {
-            handleInvalidToken(request, response, ErrorCode.AUTHORIZATION_FAILED);
+                filterChain.doFilter(request, response); // 다음 필터로 넘어가기
+
+            } catch (Exception e) {
+                handleInvalidToken(request, response, ErrorCode.AUTHORIZATION_FAILED);
+            }
         }
     }
 
@@ -102,13 +125,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setAuthentication(String token) {
         // 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
-        SecurityContextHolder.getContext().setAuthentication(tokenProvider.getAuthentication(token));
+        SecurityContextHolder.getContext().setAuthentication(tokenProvider.getUserAuthentication(token));
+    }
+
+    private void setConsultantAuthentication(String token) {
+        SecurityContextHolder.getContext().setAuthentication(tokenProvider.getConsultantAuthentication(token));
     }
 
     // 토큰 관련 예외 처리
     private void handleInvalidToken(HttpServletRequest request, HttpServletResponse response, ErrorCode errorCode) throws IOException {
 
         // ErrorCode를 요청 속성에 저장
-        request.setAttribute("errorCode", errorCode);
+        request.setAttribute(ERROR_CODE_ATTRIBUTE, errorCode);
+    }
+
+    private boolean shouldFilter(String requestURI) {
+        return URI_PREFIXES.stream().anyMatch(requestURI::startsWith);
     }
 }

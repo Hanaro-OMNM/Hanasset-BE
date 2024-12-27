@@ -1,6 +1,7 @@
 package com.omnm.hanasset.global.config.security;
 
 import com.omnm.hanasset.global.config.RedisHandler;
+import com.omnm.hanasset.user.service.GuestAuthenticationService;
 import com.omnm.hanasset.user.service.UserAuthenticationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -33,6 +34,7 @@ public class TokenProvider {
     @Value("${spring.jwt.token.refresh_expiration_time}")
     private Long REFRESH_TOKEN_EXPIRE_TIME;
 
+    private final GuestAuthenticationService guestAuthenticationService;
     private final UserAuthenticationService userAuthenticationService;
 
     private final RedisHandler redisHandler;
@@ -72,7 +74,14 @@ public class TokenProvider {
         return refreshToken;
     }
 
-    public Authentication getAuthentication(String jwt) {
+    public Authentication getGuestAuthentication() {
+        UserDetails userDetails =
+                this.guestAuthenticationService.loadUserByUsername(null);
+        return new UsernamePasswordAuthenticationToken(userDetails, "",
+                userDetails.getAuthorities());
+    }
+
+    public Authentication getUserAuthentication(String jwt) {
         UserDetails userDetails =
                 this.userAuthenticationService.loadUserByUsername(this.getUsername(jwt));
         return new UsernamePasswordAuthenticationToken(userDetails, "",
