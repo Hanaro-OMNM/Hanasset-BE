@@ -11,7 +11,7 @@ import java.util.List;
 public interface LoanRepository extends JpaRepository<Loan, Long> {
     @Query(value = """
             SELECT * FROM LOAN
-            WHERE TIMESTAMPDIFF(YEAR, NOW(), :birthdate) BETWEEN 19 AND LOAN.max_age
+            WHERE TIMESTAMPDIFF(YEAR, :birthdate, NOW()) BETWEEN 19 AND LOAN.max_age
             AND LOAN.income >= :income
             AND NOT (NOT LOAN.has_house AND :hasHouse)
             AND ((LOAN.job_type = '') OR (LOAN.job_type = :jobType))
