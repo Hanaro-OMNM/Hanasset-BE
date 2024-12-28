@@ -132,8 +132,9 @@ public class TokenProvider {
     public void destroyToken(String accessToken, String refreshToken) {
         Claims claims = parseClaims(accessToken);
         Long expiration = calculateRemainingTime(claims.getExpiration());
-        
-        if (expiration>0) {
+
+        // 이미 만료된 access token일 경우
+        if (expiration > 0) {
             redisHandler.setValueOperations(accessToken, "logout", Duration.ofMillis(expiration));
         }
         redisHandler.deleteByKey(refreshToken);
