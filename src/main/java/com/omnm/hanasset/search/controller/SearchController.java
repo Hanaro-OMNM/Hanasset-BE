@@ -17,6 +17,7 @@ import java.util.List;
 
 @Tag(name = "검색", description = "검색 API 목록")
 @RequiredArgsConstructor
+@RequestMapping("/search")
 @RestController
 public class SearchController {
 
@@ -24,8 +25,8 @@ public class SearchController {
 
     @Operation(summary = "키워드로 매물 검색 결과 조회하기", description = "query keyword로 매물 검색를 시도한다.")
     @ApiResponse(responseCode = "200", description = "검색 결과 조회 성공")
-    @GetMapping("/search-result")
-    public ApiResponseEntity<List<SearchResponse>> getSearchResult(@RequestParam("query") String keyword ) {
+    @GetMapping
+    public ApiResponseEntity<List<SearchResponse>> getSearchResult(@RequestParam("keyword") String keyword ) {
         PageRequest pageRequest = PageRequest.of(0, 10);
         List<SearchResponse> searchResponse = searchService.search(pageRequest, keyword);
 
