@@ -27,7 +27,7 @@ public class Property {
     @Column(name = "capital")
     private Integer capital;
 
-    @Column(name = "hasHouse")
+    @Column(name = "has_house")
     private Boolean hasHouse;
 
     @Column(name = "annual_interest")

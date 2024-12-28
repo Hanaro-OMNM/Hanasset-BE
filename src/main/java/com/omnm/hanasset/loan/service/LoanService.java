@@ -1,5 +1,8 @@
 package com.omnm.hanasset.loan.service;
 
+import com.omnm.hanasset.chat.entity.ConsultingItem;
+import com.omnm.hanasset.chat.repository.ChatRoomRepository;
+import com.omnm.hanasset.chat.repository.ConsultingItemRepository;
 import com.omnm.hanasset.global.exception.CustomException;
 import com.omnm.hanasset.global.exception.code.ErrorCode;
 import com.omnm.hanasset.loan.dto.LoanDetailResponse;
@@ -43,6 +46,13 @@ public class LoanService {
     private final PropertyRepository propertyRepository;
     private final RealEstateRepository realEstateRepository;
     private final HousingTypeRepository housingTypeRepository;
+    private final ConsultingItemRepository consultingItemRepository;
+
+    public LoanResponse getConsultingRecommendLoans(Long userId, String chatroomId) {
+        List<ConsultingItem> consultingItems = consultingItemRepository.findAllByChatroom_ChatroomId(chatroomId);
+        List<Long> realEstateIds = consultingItems.stream().map(consultingItem -> consultingItem.getRealEstate().getRealEstateId()).toList();
+        return getRecommendLoans(userId, realEstateIds);
+    }
 
     public LoanResponse getRecommendLoans(Long userId, List<Long> realEstateIds) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -75,8 +85,8 @@ public class LoanService {
                         userProperty.get().getIsHousingFraudVictim(),
                         housingType.getExclusiveAreaSize().intValue(),
                         realEstate.getType(),
-                        (int) (realEstate.getDeposit() / 10000),
-                        (int) (realEstate.getPrice() / 10000));
+                        (realEstate.getDeposit() / 10000),
+                        (realEstate.getPrice() / 10000));
             }
             else {
                 availableLoans = loanRepository.findAll();

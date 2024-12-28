@@ -1,6 +1,6 @@
 package com.omnm.hanasset.chat.entity;
 
-import com.omnm.hanasset.bookmark.entity.BookmarkRealEstate;
+import com.omnm.hanasset.realEstate.entity.RealEstate;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +24,6 @@ public class ConsultingItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "real_estate_id", nullable = false)
-    private BookmarkRealEstate realEstate;
+    private RealEstate realEstate;
 
 }
