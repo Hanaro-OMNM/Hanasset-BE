@@ -11,7 +11,7 @@ import java.util.List;
 public interface LoanRepository extends JpaRepository<Loan, Long> {
     @Query(value = """
             SELECT * FROM LOAN
-            WHERE LOAN.max_age >= TIMESTAMPDIFF(YEAR, NOW(), :birthdate)
+            WHERE TIMESTAMPDIFF(YEAR, :birthdate, NOW()) BETWEEN 19 AND LOAN.max_age
             AND LOAN.income >= :income
             AND NOT (NOT LOAN.has_house AND :hasHouse)
             AND ((LOAN.job_type = '') OR (LOAN.job_type = :jobType))
@@ -32,6 +32,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
                                   @Param("isHousingFraud") Boolean isHousingFraud,
                                   @Param("exclusiveArea") Integer exclusiveArea,
                                   @Param("rentType") String rentType,
-                                  @Param("deposit") Integer deposit,
-                                  @Param("price") Integer price);
+                                  @Param("deposit") Long deposit,
+                                  @Param("price") Long price);
 }
