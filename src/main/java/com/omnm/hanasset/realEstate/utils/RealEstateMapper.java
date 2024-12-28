@@ -13,6 +13,7 @@ public interface RealEstateMapper {
     @Mapping(source = "realEstate.targetFloor", target = "floor")
     RealEstateDto toRealEstateDto(RealEstate realEstate);
 
+    @Mapping(source = "realEstate.targetFloor", target = "floor")
     RealEstateBookmarkDto toRealEstateBookmarkDto(RealEstate realEstate, Boolean isBookmarked);
 
     @Mapping(source = "housingType.unitCount", target = "unitCount")
