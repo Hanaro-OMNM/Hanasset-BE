@@ -18,7 +18,7 @@ public class SearchResponse {
     @Schema(description = "단지 이름", example = "한강 극동")
     private String complexName;
 
-    @Schema(description = "단지 주소", example = "송파구 토성로 38-6")
+    @Schema(description = "단지 주소(구 - 동)", example = "송파구 풍납동")
     private String addressName;
 
     @Schema(description = "위도", example = "37.5267982")
