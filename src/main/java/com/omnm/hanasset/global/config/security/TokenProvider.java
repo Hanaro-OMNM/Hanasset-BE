@@ -1,9 +1,7 @@
 package com.omnm.hanasset.global.config.security;
 
-import com.omnm.hanasset.consultant.service.ConsultantAuthenticationService;
 import com.omnm.hanasset.global.config.RedisHandler;
 import com.omnm.hanasset.user.service.GuestAuthenticationService;
-import com.omnm.hanasset.user.service.UserAuthenticationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -37,11 +35,8 @@ public class TokenProvider {
 
     private final GuestAuthenticationService guestAuthenticationService;
     private final UserAuthenticationService userAuthenticationService;
-    private final ConsultantAuthenticationService consultantAuthenticationService;
 
     private final RedisHandler redisHandler;
-
-    private static final String CONSULTANT_PREFIX = "CONSULTANT "; // 해당 토큰이 상담사 관련 토큰인지 명시하는 prefix
 
     // 액세스 토큰 생성
     public String generateAccessToken(String username) {
@@ -92,13 +87,6 @@ public class TokenProvider {
                 userDetails.getAuthorities());
     }
 
-    public Authentication getConsultantAuthentication(String jwt) {
-        String usernameWithPrefix = this.getUsername(jwt);
-
-        UserDetails userDetails = this.consultantAuthenticationService.loadUserByUsername(usernameWithPrefix.substring(CONSULTANT_PREFIX.length()));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    }
-
     public String getUsername(String token) {
         return this.parseClaims(token).getSubject();
     }
@@ -144,8 +132,9 @@ public class TokenProvider {
     public void destroyToken(String accessToken, String refreshToken) {
         Claims claims = parseClaims(accessToken);
         Long expiration = calculateRemainingTime(claims.getExpiration());
-        
-        if (expiration>0) {
+
+        // 이미 만료된 access token일 경우
+        if (expiration > 0) {
             redisHandler.setValueOperations(accessToken, "logout", Duration.ofMillis(expiration));
         }
         redisHandler.deleteByKey(refreshToken);

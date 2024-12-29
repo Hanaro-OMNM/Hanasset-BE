@@ -58,6 +58,9 @@ dependencies {
 	// 구글 STMP 이용 위한 의존성
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.0.5'
 
+	// QueryDsl
+	implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
@@ -65,9 +68,9 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -75,4 +78,13 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Query DSL configurations
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', 'build/generated/sources/annotations']
+		}
+	}
 }

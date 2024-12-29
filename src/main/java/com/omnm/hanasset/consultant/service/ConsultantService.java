@@ -38,8 +38,8 @@ public class ConsultantService {
 
         List<String> tokensList = new ArrayList<>();
 
-        String accessToken = tokenProvider.generateAccessToken("CONSULTANT " + consultantSignInRequest.getConsultantLoginId());
-        String refreshToken = tokenProvider.generateRefreshToken("CONSULTANT " + consultantSignInRequest.getConsultantLoginId());
+        String accessToken = tokenProvider.generateAccessToken(consultantSignInRequest.getConsultantLoginId());
+        String refreshToken = tokenProvider.generateRefreshToken(consultantSignInRequest.getConsultantLoginId());
 
         tokensList.add(accessToken);
         tokensList.add(refreshToken);
@@ -48,8 +48,8 @@ public class ConsultantService {
     }
 
     @Transactional
-    public ConsultantInfoResponse getConsultantInfo(String consultantLoginId) {
-        Consultant consultant = consultantRepository.findByconsultantLoginId(consultantLoginId).orElseThrow(() -> new CustomException(ErrorCode.CONSULTANT_NOT_FOUND));
+    public ConsultantInfoResponse getConsultantInfo(Long consultantId) {
+        Consultant consultant = consultantRepository.findById(consultantId).orElseThrow(() -> new CustomException(ErrorCode.CONSULTANT_NOT_FOUND));
 
         return ConsultantInfoResponse.builder()
                 .consultantId(consultant.getConsultantId())

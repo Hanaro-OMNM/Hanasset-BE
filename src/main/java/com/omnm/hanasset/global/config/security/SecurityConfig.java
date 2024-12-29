@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 .requestMatchers("/loan/**").authenticated()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/ws-chat/**").permitAll()
+                                .requestMatchers("/search/**").permitAll()
                                 .requestMatchers("/consultant/signin/**").permitAll()
                                 .requestMatchers("/consultant/**").authenticated()
                                 .requestMatchers("/swagger", "/swagger-ui.html").permitAll()
@@ -61,5 +62,4 @@ public class SecurityConfig {
                 );
         return http.build();
     }
-
 }
