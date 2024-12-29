@@ -1,7 +1,6 @@
 package com.omnm.hanasset.chat.controller;
 
 import com.omnm.hanasset.chat.dto.ChatMessageDTO;
-import com.omnm.hanasset.chat.entity.ChatMessage;
 import com.omnm.hanasset.chat.redis.RedisStreamPublisher;
 import com.omnm.hanasset.chat.redis.RedisStreamSubscriber;
 import com.omnm.hanasset.chat.utils.ChatMapper;

@@ -24,7 +24,7 @@ public class ChatMessage {
     @JoinColumn(name = "chatroom_id", nullable = false)
     private ChatRoom chatroom;
 
-    @Column(name = "sender_id", nullable = false)
+    @Column(name = "sender_id")
     private Long senderId;
 
     @Column(name = "accessor", length = 225)

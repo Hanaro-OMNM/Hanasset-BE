@@ -15,11 +15,9 @@ import java.util.Optional;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 
     // Assuming ChatRoomRepository is a JPA repository
-    @Query("SELECT c FROM ChatRoom c WHERE c.consultant.consultantId = :consultantId AND c.chatroomStatus = 'waiting' AND c.reservedTime >= :startOfDay AND c.reservedTime < :endOfDay")
+    @Query("SELECT c FROM ChatRoom c WHERE c.consultant.consultantId = :consultantId AND c.chatroomStatus = 'waiting'")
     List<ChatRoom> findWaitingRoomsByConsultantIdAndReservedDate(
-            @Param("consultantId") Long consultantId,
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("endOfDay") LocalDateTime endOfDay
+            @Param("consultantId") Long consultantId
     );
 
     @Query("SELECT c.chatroomId FROM ChatRoom c WHERE c.user.userId = :userId AND c.chatroomStatus = :chatroomStatus")

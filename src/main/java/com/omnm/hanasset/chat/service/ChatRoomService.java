@@ -198,7 +198,7 @@ public class ChatRoomService {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
         List<ChatRoom> waitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(
-                consultantId, startOfDay, endOfDay);
+                consultantId);
 
         List<WaitingRoomDTO> waitingRoomDTOS = waitingRooms.stream()
                 .map(chatRoom -> {
@@ -241,6 +241,7 @@ public class ChatRoomService {
             List<MapRecord<String, Object, Object>> messages = redisStreamTemplate.opsForStream()
                     .read(StreamReadOptions.empty().block(Duration.ofMillis(500)),
                             StreamOffset.create(streamKey, ReadOffset.from("0")));
+
             if (messages != null && !messages.isEmpty()) {
                 for (MapRecord<String, Object, Object> message : messages) {
                     Map<Object, Object> rawData = message.getValue();
@@ -258,7 +259,8 @@ public class ChatRoomService {
         if (waitingRooms.isEmpty()) {
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-            List<ChatRoom> foundWaitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId, startOfDay, endOfDay);
+            List<ChatRoom> foundWaitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId);
+
             waitingRooms = foundWaitingRooms.stream()
                     .map(chatRoom -> {
                         User user = userRepository.findById(chatRoom.getUser().getUserId())
