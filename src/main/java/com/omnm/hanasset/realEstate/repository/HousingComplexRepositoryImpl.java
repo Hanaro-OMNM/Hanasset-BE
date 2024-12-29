@@ -37,7 +37,7 @@ public class HousingComplexRepositoryImpl implements HousingComplexRepositoryCus
 
         List<HousingComplex> resultList = Stream.concat(nameResults.stream(), addressResults.stream())
                 .distinct()
-                .limit(10)
+                .limit(pageRequest.getPageSize())
                 .collect(Collectors.toList());
 
         return new PageImpl<>(resultList, pageRequest, resultList.size());
