@@ -27,6 +27,7 @@ import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -144,6 +145,7 @@ public class ChatRoomService {
         }
     }
 
+    @Transactional
     public void deleteRoom(String chatroomId) {
         // Redis Stream 키
         String streamKey = "stream_" + chatroomId;
@@ -163,7 +165,11 @@ public class ChatRoomService {
         // 2. DB에서 ChatRoom 삭제
         try {
             if (chatRoomRepository.existsById(chatroomId)) { // 삭제 대상 존재 여부 확인
+                List<ConsultingItem> relatedItems = consultingItemRepository.findAllByChatroom_ChatroomId(chatroomId);
+                relatedItems.forEach(item -> consultingItemRepository.delete(item));
+
                 chatRoomRepository.deleteById(chatroomId);
+
                 log.info("ChatRoom [{}] deleted successfully from DB.", chatroomId);
             } else {
                 log.warn("ChatRoom [{}] not found in DB.", chatroomId);
@@ -198,7 +204,7 @@ public class ChatRoomService {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
         List<ChatRoom> waitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(
-                consultantId, startOfDay, endOfDay);
+                consultantId);
 
         List<WaitingRoomDTO> waitingRoomDTOS = waitingRooms.stream()
                 .map(chatRoom -> {
@@ -241,6 +247,7 @@ public class ChatRoomService {
             List<MapRecord<String, Object, Object>> messages = redisStreamTemplate.opsForStream()
                     .read(StreamReadOptions.empty().block(Duration.ofMillis(500)),
                             StreamOffset.create(streamKey, ReadOffset.from("0")));
+
             if (messages != null && !messages.isEmpty()) {
                 for (MapRecord<String, Object, Object> message : messages) {
                     Map<Object, Object> rawData = message.getValue();
@@ -258,7 +265,8 @@ public class ChatRoomService {
         if (waitingRooms.isEmpty()) {
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-            List<ChatRoom> foundWaitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId, startOfDay, endOfDay);
+            List<ChatRoom> foundWaitingRooms = chatRoomRepository.findWaitingRoomsByConsultantIdAndReservedDate(consultantId);
+
             waitingRooms = foundWaitingRooms.stream()
                     .map(chatRoom -> {
                         User user = userRepository.findById(chatRoom.getUser().getUserId())
