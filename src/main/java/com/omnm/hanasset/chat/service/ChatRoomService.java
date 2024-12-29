@@ -27,6 +27,7 @@ import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -144,6 +145,7 @@ public class ChatRoomService {
         }
     }
 
+    @Transactional
     public void deleteRoom(String chatroomId) {
         // Redis Stream 키
         String streamKey = "stream_" + chatroomId;
@@ -163,7 +165,11 @@ public class ChatRoomService {
         // 2. DB에서 ChatRoom 삭제
         try {
             if (chatRoomRepository.existsById(chatroomId)) { // 삭제 대상 존재 여부 확인
+                List<ConsultingItem> relatedItems = consultingItemRepository.findAllByChatroom_ChatroomId(chatroomId);
+                relatedItems.forEach(item -> consultingItemRepository.delete(item));
+
                 chatRoomRepository.deleteById(chatroomId);
+
                 log.info("ChatRoom [{}] deleted successfully from DB.", chatroomId);
             } else {
                 log.warn("ChatRoom [{}] not found in DB.", chatroomId);

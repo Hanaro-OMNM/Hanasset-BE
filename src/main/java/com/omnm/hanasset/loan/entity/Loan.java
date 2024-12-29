@@ -16,30 +16,31 @@ public class Loan {
     @Column(name = "name_text")
     private String nameText;
 
-    @Column(name = "type_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "type_text", columnDefinition = "TEXT")
     private String typeText;
 
-    @Column(name = "feature_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "feature_text", columnDefinition = "TEXT")
     private String featureText;
 
-    @Column(name = "outline_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "outline_text", columnDefinition = "TEXT")
     private String outlineText;
 
-    @Column(name = "target_guest_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "target_guest_text", columnDefinition = "TEXT")
     private String targetGuestText;
 
-    @Column(name = "target_house_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "target_house_text", columnDefinition = "TEXT")
     private String targetHouseText;
 
-    @Column(name = "limit_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "limit_text", columnDefinition = "TEXT")
     private String limitText;
 
+    @Column(name="rate_text")
     private String rateText;
 
-    @Column(name = "period_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "period_text", columnDefinition = "TEXT")
     private String periodText;
 
-    @Column(name = "payback_method_text", columnDefinition = "VARCHAR(2048)")
+    @Column(name = "payback_method_text", columnDefinition = "TEXT")
     private String paybackMethodText;
 
     private String provider;
