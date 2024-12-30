@@ -54,7 +54,7 @@ public class ChatRoomController {
                 request.getReservedTime(),
                 request.getReservationInfo()
         );
-
+        chatRoomService.addWaitingRoomToStream(request.getConsultantId());
         System.out.printf("Received reservationInfo: {}", request.getReservationInfo());
         return ApiResponseEntity.ok("채팅방 생성 성공", response);
     }
